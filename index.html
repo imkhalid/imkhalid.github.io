@@ -682,7 +682,7 @@
     <p class="hero-sub">Building secure, scalable, enterprise-grade Android applications with modern architecture, fintech integrations, and advanced mobile security systems.</p>
     <div class="hero-ctas">
       <a href="#projects" class="btn-primary">↗ View Projects</a>
-      <a href="#contact" class="btn-outline">↓ Download Resume</a>
+      <a href="Khalid_Saeed_Resume.docx" download="Khalid_Saeed_Resume.docx" class="btn-outline">↓ Download Resume</a>
     </div>
     <div class="hero-stats">
       <div class="stat-item">
@@ -733,7 +733,7 @@
 
 <!-- ABOUT -->
 <section id="about">
-  <div class="section-label">Who I Am</div>
+  <div class="section-label reveal">Who I Am</div>
   <div class="section-title reveal">Engineering excellence<br>at production scale</div>
   <div class="about-grid">
     <div class="about-text reveal">
@@ -1232,7 +1232,7 @@
   // Scroll reveal - covers both .reveal and .timeline-item
   const allReveal = document.querySelectorAll('.reveal, .timeline-item');
   const observer = new IntersectionObserver(entries => {
-    entries.forEach((e, i) => {
+    entries.forEach(e => {
       if (e.isIntersecting) {
         const delay = e.target.classList.contains('timeline-item')
           ? [...document.querySelectorAll('.timeline-item')].indexOf(e.target) * 120
@@ -1241,8 +1241,15 @@
         observer.unobserve(e.target);
       }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
   allReveal.forEach(r => observer.observe(r));
+  // Force-reveal anything already in view on load
+  setTimeout(() => {
+    allReveal.forEach(r => {
+      const rect = r.getBoundingClientRect();
+      if (rect.top < window.innerHeight) r.classList.add('visible');
+    });
+  }, 100);
 
   // Active nav link highlight on scroll
   const sections = document.querySelectorAll('section[id]');
