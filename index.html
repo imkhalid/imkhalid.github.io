@@ -34,13 +34,12 @@
     cursor: none;
   }
 
-  /* PERF: Static noise via SVG URI - no JS */
+  /* Static noise — no JS, no animation */
   body::before {
     content: '';
     position: fixed; inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
     pointer-events: none; z-index: 9000; opacity: 0.35;
-    will-change: auto;
   }
 
   /* CUSTOM CURSOR */
@@ -51,7 +50,6 @@
     position: fixed; top: 0; left: 0;
     pointer-events: none; z-index: 9999;
     transform: translate(-50%, -50%);
-    transition: width 0.2s, height 0.2s;
     will-change: transform;
   }
   .cursor-ring {
@@ -89,8 +87,6 @@
     padding: 120px 48px 80px;
     position: relative; overflow: hidden;
   }
-
-  /* PERF: CSS grid bg instead of animated JS canvas */
   .hero-grid-bg {
     position: absolute; inset: 0;
     background-image:
@@ -102,7 +98,6 @@
   }
   @keyframes gridshift { 0% { transform: translateY(0); } 100% { transform: translateY(60px); } }
 
-  /* PERF: Simplified orbs - no blur filter on animate */
   .hero-orb-1 {
     position: absolute; border-radius: 50%; pointer-events: none;
     width: 500px; height: 500px;
@@ -232,7 +227,7 @@
   .tab-content.active { display: grid; }
 
   /* ======================== */
-  /* APP SHOWCASE SECTION     */
+  /*   APP SHOWCASE SECTION   */
   /* ======================== */
   #app-showcase {
     background: linear-gradient(180deg, var(--bg2) 0%, #050c1a 100%);
@@ -242,183 +237,214 @@
   }
   #app-showcase::before {
     content: '';
-    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-    width: 800px; height: 600px;
+    position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+    width: 700px; height: 500px;
     background: radial-gradient(ellipse, rgba(61,220,132,0.05) 0%, transparent 65%);
     pointer-events: none;
   }
 
-  .showcase-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 40px;
-    margin-top: 56px;
-    max-width: 1000px;
+  /* Two-card row */
+  .showcase-row {
+    display: flex;
+    gap: 36px;
+    flex-wrap: wrap;
+    margin-top: 8px;
   }
 
+  /* App card */
   .app-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    transition: border-color 0.3s, transform 0.3s;
+    width: 420px;
+    flex-shrink: 0;
     position: relative;
-  }
-  .app-card:hover {
-    border-color: rgba(61,220,132,0.45);
-    transform: translateY(-6px);
+    transition: border-color 0.35s, transform 0.35s;
+    will-change: transform;
   }
   .app-card::before {
     content: '';
     position: absolute; top: 0; left: 0; right: 0; height: 2px;
     background: linear-gradient(90deg, var(--accent), var(--accent2));
-    opacity: 0;
-    transition: opacity 0.3s;
+    opacity: 0; transition: opacity 0.35s;
   }
+  .app-card:hover { border-color: rgba(61,220,132,0.45); transform: translateY(-6px); }
   .app-card:hover::before { opacity: 1; }
 
-  /* Phone device frame */
-  .phone-frame-wrapper {
+  /* Phone stage */
+  .phone-stage {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    padding: 32px 24px 0;
-    background: linear-gradient(160deg, rgba(13,21,38,0.8), rgba(5,8,16,0.95));
+    padding: 36px 0 0;
     position: relative;
-    min-height: 320px;
+    min-height: 380px;
+    background: linear-gradient(160deg, #0d1a2e 0%, #050810 100%);
   }
 
+  /* Ambient floor glow — static only */
+  .phone-stage::after {
+    content: '';
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 60px;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.18;
+  }
+  .card-jhk .phone-stage::after   { background: radial-gradient(ellipse, #0066cc 0%, transparent 70%); }
+  .card-active .phone-stage::after { background: radial-gradient(ellipse, #8b2fc9 0%, transparent 70%); }
+
+  /* Floating info badges */
+  .float-badge {
+    position: absolute;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+  .badge-tl { top: 16px; left: 16px; background: rgba(61,220,132,0.1); border: 1px solid rgba(61,220,132,0.25); color: var(--accent); }
+  .badge-br { bottom: 28px; right: 16px; background: rgba(56,139,253,0.1); border: 1px solid rgba(56,139,253,0.25); color: var(--accent2); }
+
+  /* Phone hardware */
   .phone-device {
-    width: 150px;
-    background: #0a0f1e;
-    border-radius: 28px;
-    border: 2px solid rgba(255,255,255,0.12);
+    width: 168px;
+    background: #06090f;
+    border-radius: 36px;
+    border: 2px solid rgba(255,255,255,0.13);
     position: relative;
     box-shadow:
-      0 0 0 1px rgba(0,0,0,0.8),
-      0 30px 60px rgba(0,0,0,0.6),
-      inset 0 0 0 1px rgba(255,255,255,0.05);
+      0 0 0 1px rgba(0,0,0,0.9),
+      0 32px 64px rgba(0,0,0,0.75),
+      inset 0 0 0 1px rgba(255,255,255,0.04);
     overflow: hidden;
-    transition: transform 0.4s;
-  }
-  .app-card:hover .phone-device {
-    transform: scale(1.04) rotate(-1deg);
+    z-index: 2;
   }
 
   /* Dynamic island */
-  .phone-notch {
-    position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-    width: 52px; height: 14px;
-    background: #000;
-    border-radius: 10px;
-    z-index: 10;
+  .phone-island {
+    position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+    width: 56px; height: 16px;
+    background: #000; border-radius: 12px; z-index: 20;
   }
 
-  /* Side buttons */
+  /* Power button */
   .phone-device::before {
     content: '';
-    position: absolute; right: -3px; top: 60px;
-    width: 3px; height: 40px;
-    background: rgba(255,255,255,0.1);
+    position: absolute; right: -3px; top: 70px;
+    width: 3px; height: 44px;
+    background: rgba(255,255,255,0.09);
     border-radius: 0 2px 2px 0;
   }
+  /* Volume buttons */
+  .phone-device::after {
+    content: '';
+    position: absolute; left: -3px; top: 54px;
+    width: 3px; height: 72px;
+    background: rgba(255,255,255,0.09);
+    border-radius: 2px 0 0 2px;
+    box-shadow: 0 38px 0 rgba(255,255,255,0.09);
+  }
 
-  .phone-screen {
+  /* ── Screenshot carousel ── */
+  .screen-carousel {
     width: 100%;
-    aspect-ratio: 9/19.5;
-    display: flex;
-    flex-direction: column;
+    aspect-ratio: 9 / 19.5;
     overflow: hidden;
     position: relative;
-    border-radius: 27px;
+    border-radius: 34px;
+    background: #06090f;
   }
 
-  /* Screenshot container - uses actual Play Store images */
-  .app-screenshot {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top center;
-    display: block;
-  }
-
-  /* Fallback UI when image unavailable */
-  .app-ui-fallback {
-    width: 100%; height: 100%;
-    display: flex; flex-direction: column;
-    overflow: hidden;
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
-  .app-topbar {
-    padding: 36px 10px 10px;
-    font-size: 7px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: #fff;
-  }
-  .app-hero-card {
-    margin: 0 8px;
-    border-radius: 10px;
-    padding: 14px 10px;
+  .slides-track {
     display: flex;
-    align-items: center;
-    gap: 8px;
+    width: 100%; height: 100%;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .app-icon-circle {
-    width: 32px; height: 32px; border-radius: 8px;
+
+  .slide {
+    min-width: 100%; height: 100%;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Screenshots are landscape (16:9) from Play Store.
+     We crop them to portrait by pinning the top-left corner. */
+  .slide img {
+    width: 200%;           /* zoom in — show left half of landscape image */
+    height: auto;
+    display: block;
+    object-fit: cover;
+    object-position: left top;
+    transform-origin: top left;
+  }
+
+  /* Dot indicators */
+  .slide-dots {
+    position: absolute;
+    bottom: 10px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 5px; z-index: 10;
+  }
+  .slide-dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(255,255,255,0.3);
+    transition: background 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  .slide-dot.active { background: var(--accent); transform: scale(1.4); }
+
+  /* Prev / Next buttons below phone */
+  .carousel-controls {
+    display: flex; gap: 10px;
+    margin: 14px 0 20px;
+  }
+  .carousel-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(61,220,132,0.07);
+    border: 1px solid rgba(61,220,132,0.22);
+    color: var(--accent); font-size: 16px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px; flex-shrink: 0;
+    cursor: pointer; transition: background 0.2s, border-color 0.2s;
+    line-height: 1;
   }
-  .app-card-title { font-size: 7px; font-weight: 700; color: #fff; line-height: 1.3; }
-  .app-card-sub { font-size: 5.5px; color: rgba(255,255,255,0.6); margin-top: 2px; }
-  .app-menu-items { padding: 8px 8px 0; display: flex; flex-direction: column; gap: 5px; }
-  .app-menu-item {
-    background: rgba(255,255,255,0.05); border-radius: 6px;
-    padding: 7px 8px; display: flex; align-items: center; gap: 6px;
-  }
-  .app-menu-dot { width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0; }
-  .app-menu-text { flex: 1; }
-  .app-menu-label { font-size: 5.5px; color: rgba(255,255,255,0.85); font-weight: 600; }
-  .app-menu-sub { font-size: 4.5px; color: rgba(255,255,255,0.4); margin-top: 1px; }
+  .carousel-btn:hover { background: rgba(61,220,132,0.18); border-color: var(--accent); }
 
-  /* Floating glow under phone */
-  .phone-glow {
-    position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
-    width: 100px; height: 30px;
-    background: var(--accent);
-    border-radius: 50%;
-    opacity: 0.12;
-    filter: blur(16px);
-  }
-
-  /* App info section */
+  /* App info */
   .app-info {
-    padding: 20px 24px 24px;
+    padding: 20px 24px 26px;
+    border-top: 1px solid var(--border);
   }
-  .app-badge {
+  .app-badge-pill {
     display: inline-flex; align-items: center; gap: 6px;
-    background: rgba(61,220,132,0.08); border: 1px solid rgba(61,220,132,0.2);
+    background: rgba(61,220,132,0.07); border: 1px solid rgba(61,220,132,0.18);
     border-radius: 2px; padding: 3px 10px;
     font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--accent);
-    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px;
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px;
   }
-  .app-name { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
-  .app-desc { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
-  .app-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); animation: blink 2s ease infinite; }
+  .app-name { font-size: 22px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .app-desc { font-size: 13px; color: var(--muted); line-height: 1.65; margin-bottom: 16px; }
+  .app-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
   .app-tag {
     font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--accent2);
-    background: rgba(56,139,253,0.08); border: 1px solid rgba(56,139,253,0.15);
-    border-radius: 2px; padding: 3px 8px; letter-spacing: 0.08em;
+    background: rgba(56,139,253,0.07); border: 1px solid rgba(56,139,253,0.15);
+    border-radius: 2px; padding: 3px 8px; letter-spacing: 0.07em;
   }
-  .app-store-link {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--accent);
-    text-decoration: none; letter-spacing: 0.08em;
-    border: 1px solid rgba(61,220,132,0.25); border-radius: 2px; padding: 7px 14px;
-    transition: border-color 0.2s, background 0.2s;
+  .app-store-btn {
+    display: inline-flex; align-items: center; gap: 9px;
+    font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+    background: var(--accent); color: #000;
+    border: none; border-radius: 4px;
+    padding: 10px 18px; font-weight: 600; letter-spacing: 0.07em;
+    text-decoration: none; transition: opacity 0.2s; cursor: pointer;
   }
-  .app-store-link:hover { border-color: var(--accent); background: rgba(61,220,132,0.07); }
+  .app-store-btn:hover { opacity: 0.85; }
 
   /* SECURITY */
   #security { background: var(--bg2); position: relative; overflow: hidden; }
@@ -514,7 +540,7 @@
   .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .reveal.visible { opacity: 1; transform: translateY(0); }
 
-  @media (max-width: 900px) {
+  @media (max-width: 960px) {
     nav { padding: 14px 20px; }
     .nav-links { display: none; }
     section, #app-showcase { padding: 56px 20px; }
@@ -523,7 +549,8 @@
     .hero-stats { gap: 20px; }
     .about-grid, .security-grid, .contact-grid { grid-template-columns: 1fr; gap: 28px; }
     .security-cards { grid-template-columns: 1fr; }
-    .showcase-grid { grid-template-columns: 1fr; }
+    .showcase-row { justify-content: center; }
+    .app-card { width: 100%; max-width: 420px; }
     footer { padding: 20px; flex-direction: column; gap: 10px; }
     .section-divider { margin: 0 20px; }
   }
@@ -547,16 +574,13 @@
   </ul>
 </nav>
 
+<!-- HERO -->
 <section id="hero">
   <div class="hero-grid-bg"></div>
   <div class="hero-orb-1"></div>
   <div class="hero-orb-2"></div>
-
   <div class="hero-content">
-    <div class="hero-badge">
-      <div class="badge-dot"></div>
-      Available for Senior Roles &amp; Consulting
-    </div>
+    <div class="hero-badge"><div class="badge-dot"></div>Available for Senior Roles &amp; Consulting</div>
     <h1 class="hero-name">Khalid<br><span>Saeed</span></h1>
     <div class="hero-title">// Senior Android Engineer — Kotlin &amp; Jetpack Compose Specialist</div>
     <p class="hero-sub">Building secure, scalable, enterprise-grade Android applications with modern architecture, fintech integrations, and advanced mobile security systems.</p>
@@ -571,7 +595,6 @@
       <div class="stat-item"><div class="stat-num">5<span>+</span></div><div class="stat-label">Fintech Integrations</div></div>
     </div>
   </div>
-
   <div class="floating-code">
     <div class="code-header">
       <div class="code-dot" style="background:#ff5f57"></div>
@@ -611,22 +634,10 @@
       <p>Currently at <strong>Ozoned Digital</strong> as Senior Android Developer and Team Lead, driving mobile innovation across insurance-tech platforms.</p>
     </div>
     <div class="about-highlights reveal">
-      <div class="highlight-card">
-        <div class="highlight-icon">🏗️</div>
-        <div class="highlight-content"><h4>Architecture-First Thinking</h4><p>MVVM, Clean Architecture, and Modular patterns applied at enterprise scale with testability and maintainability as core requirements.</p></div>
-      </div>
-      <div class="highlight-card">
-        <div class="highlight-icon">🔒</div>
-        <div class="highlight-content"><h4>Mobile Security Expert</h4><p>Deep expertise in SSL pinning, encryption layers, root detection, and secure API communication for financial-grade applications.</p></div>
-      </div>
-      <div class="highlight-card">
-        <div class="highlight-icon">👥</div>
-        <div class="highlight-content"><h4>Team Leadership</h4><p>Led teams of 7+ developers across Android and iOS, managing delivery timelines, code reviews, and technical mentorship.</p></div>
-      </div>
-      <div class="highlight-card">
-        <div class="highlight-icon">💳</div>
-        <div class="highlight-content"><h4>Fintech Specialist</h4><p>Integrated Meezan, UBL, Alfalah, and EasyPaisa payment gateways with PCI-compliant security implementations.</p></div>
-      </div>
+      <div class="highlight-card"><div class="highlight-icon">🏗️</div><div class="highlight-content"><h4>Architecture-First Thinking</h4><p>MVVM, Clean Architecture, and Modular patterns applied at enterprise scale with testability and maintainability as core requirements.</p></div></div>
+      <div class="highlight-card"><div class="highlight-icon">🔒</div><div class="highlight-content"><h4>Mobile Security Expert</h4><p>Deep expertise in SSL pinning, encryption layers, root detection, and secure API communication for financial-grade applications.</p></div></div>
+      <div class="highlight-card"><div class="highlight-icon">👥</div><div class="highlight-content"><h4>Team Leadership</h4><p>Led teams of 7+ developers across Android and iOS, managing delivery timelines, code reviews, and technical mentorship.</p></div></div>
+      <div class="highlight-card"><div class="highlight-icon">💳</div><div class="highlight-content"><h4>Fintech Specialist</h4><p>Integrated Meezan, UBL, Alfalah, and EasyPaisa payment gateways with PCI-compliant security implementations.</p></div></div>
     </div>
   </div>
 </section>
@@ -670,198 +681,89 @@
 
 <div class="section-divider"></div>
 
-<!-- APP SHOWCASE -->
+<!-- ═══════════════════════════════════════════════ -->
+<!--  APP SHOWCASE — real screenshots + carousel    -->
+<!-- ═══════════════════════════════════════════════ -->
 <section id="app-showcase">
   <div class="section-label">Live on Google Play</div>
   <div class="section-title reveal">Production apps<br>in the wild</div>
-  <p class="section-sub reveal">Real applications actively serving thousands of users across Pakistan's top insurance companies — built, architected, and led by me.</p>
+  <p class="section-sub reveal">Real applications actively serving thousands of users — built, architected, and led by me.</p>
 
-  <div class="showcase-grid reveal">
+  <div class="showcase-row">
 
-    <!-- App 1: Jubilee Health Key (JHK) -->
-    <div class="app-card">
-      <div class="phone-frame-wrapper">
+    <!-- ── Card 1: JForce (JHK) ── -->
+    <div class="app-card card-jhk reveal">
+      <div class="phone-stage">
+        <div class="float-badge badge-tl">★ 4.8 · Finance</div>
+        <div class="float-badge badge-br">5K+ Downloads</div>
+
         <div class="phone-device">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <!-- Styled UI resembling the JHK app -->
-            <div class="app-ui-fallback" style="background: linear-gradient(170deg, #003366 0%, #001a4d 40%, #00264d 100%);">
-              <div class="app-topbar" style="background: rgba(0,50,100,0.6); padding-top: 28px;">
-                <div style="display:flex; align-items:center; justify-content:space-between; padding: 0 10px 8px;">
-                  <span style="font-size:7px; color:rgba(255,255,255,0.5); letter-spacing:0.05em;">9:41</span>
-                  <span style="font-size:6px; color:rgba(255,255,255,0.5);">●●●</span>
-                </div>
-                <div style="padding: 4px 10px 10px; display:flex; align-items:center; gap:6px;">
-                  <div style="width:18px;height:18px;border-radius:4px;background:#0066cc;display:flex;align-items:center;justify-content:center;font-size:10px;">🏥</div>
-                  <div>
-                    <div style="font-size:6.5px;font-weight:700;color:#fff;letter-spacing:0.04em;">JHK — Jubilee Health</div>
-                    <div style="font-size:5px;color:rgba(255,255,255,0.45);">Health Insurance Platform</div>
-                  </div>
-                </div>
-              </div>
-              <div style="padding: 6px 8px; flex:1;">
-                <div style="background: linear-gradient(135deg, #0055a5, #0077cc); border-radius: 10px; padding: 12px 10px; margin-bottom:6px;">
-                  <div style="font-size:5.5px;color:rgba(255,255,255,0.6);margin-bottom:2px;font-family:'IBM Plex Mono',monospace;">POLICY HOLDER</div>
-                  <div style="font-size:8px;font-weight:700;color:#fff;margin-bottom:1px;">Khalid Saeed</div>
-                  <div style="font-size:5px;color:rgba(255,255,255,0.5);">Policy #JHK-2024-00847</div>
-                  <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.15);">
-                    <div><div style="font-size:4.5px;color:rgba(255,255,255,0.5);">Coverage</div><div style="font-size:7px;color:#3ddc84;font-weight:700;">Rs 5M</div></div>
-                    <div><div style="font-size:4.5px;color:rgba(255,255,255,0.5);">Status</div><div style="font-size:7px;color:#3ddc84;font-weight:700;">Active ✓</div></div>
-                    <div><div style="font-size:4.5px;color:rgba(255,255,255,0.5);">Renew</div><div style="font-size:7px;color:#fff;font-weight:700;">Dec 2025</div></div>
-                  </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px;">
-                  <div style="background:rgba(255,255,255,0.07);border-radius:7px;padding:8px;text-align:center;">
-                    <div style="font-size:14px;margin-bottom:2px;">🏥</div>
-                    <div style="font-size:5.5px;color:#fff;font-weight:600;">Claim</div>
-                    <div style="font-size:4.5px;color:rgba(255,255,255,0.4);">Submit</div>
-                  </div>
-                  <div style="background:rgba(255,255,255,0.07);border-radius:7px;padding:8px;text-align:center;">
-                    <div style="font-size:14px;margin-bottom:2px;">💊</div>
-                    <div style="font-size:5.5px;color:#fff;font-weight:600;">Benefits</div>
-                    <div style="font-size:4.5px;color:rgba(255,255,255,0.4);">View All</div>
-                  </div>
-                </div>
-                <div style="background:rgba(255,255,255,0.05);border-radius:7px;padding:8px;">
-                  <div style="font-size:5.5px;color:rgba(255,255,255,0.5);margin-bottom:5px;letter-spacing:0.06em;font-family:'IBM Plex Mono',monospace;">RECENT CLAIMS</div>
-                  <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                    <span style="font-size:5.5px;color:#fff;">OPD Visit - Shaukat</span>
-                    <span style="font-size:5.5px;color:#3ddc84;">Approved</span>
-                  </div>
-                  <div style="display:flex;justify-content:space-between;">
-                    <span style="font-size:5.5px;color:#fff;">Lab Tests</span>
-                    <span style="font-size:5.5px;color:#febc2e;">Pending</span>
-                  </div>
-                </div>
-              </div>
-              <div style="background:rgba(0,0,0,0.3);padding:8px;display:flex;justify-content:space-around;border-top:1px solid rgba(255,255,255,0.08);">
-                <div style="text-align:center"><div style="font-size:12px;">🏠</div><div style="font-size:4px;color:#3ddc84;">Home</div></div>
-                <div style="text-align:center"><div style="font-size:12px;">📋</div><div style="font-size:4px;color:rgba(255,255,255,0.4);">Claims</div></div>
-                <div style="text-align:center"><div style="font-size:12px;">🏥</div><div style="font-size:4px;color:rgba(255,255,255,0.4);">Network</div></div>
-                <div style="text-align:center"><div style="font-size:12px;">👤</div><div style="font-size:4px;color:rgba(255,255,255,0.4);">Profile</div></div>
-              </div>
+          <div class="phone-island"></div>
+          <div class="screen-carousel">
+            <div class="slides-track" id="track-jhk">
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/CGKBQmFz-7ZNVEetEyocNIi5Hud_5SDUHauwZuj2skvK_FSjamzCiCjC6bknyLakQ7E=w526-h296" alt="JForce screen 1" loading="eager"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/Vfr7zgTDsl6Z--4C40gCEjBKI4u5aANPHeklW4luOTntpv0jDptzO9XWdTEi8Rj69g=w526-h296" alt="JForce screen 2" loading="lazy"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/knak5tXi0DsR_u3Fj6bTQ-05AR6NgoYRLSbJoTzI6gcfB98eM3fGRdpFh7mKx1l8kk8=w526-h296" alt="JForce screen 3" loading="lazy"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/Bvk59Ux1sUCqqQ1pE43tm7KytLlexJM9eSrtjOBgBDGBFZ46PozR_sBk4Tf5VWca1tU=w526-h296" alt="JForce screen 4" loading="lazy"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/lasmGgPwFbg_vTGPWPRmcma8kCLLhxoiPpcpj2lZ_i-4thb75oyqWvpdt7mQT7rcF2k=w526-h296" alt="JForce screen 5" loading="lazy"></div>
             </div>
+            <div class="slide-dots" id="dots-jhk"></div>
           </div>
         </div>
-        <div class="phone-glow" style="background:#0066cc;"></div>
-        <!-- Decorative floating elements -->
-        <div style="position:absolute;top:20px;left:20px;background:rgba(61,220,132,0.1);border:1px solid rgba(61,220,132,0.2);border-radius:6px;padding:6px 10px;">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--accent);">★ 4.5 Rating</div>
-        </div>
-        <div style="position:absolute;bottom:24px;right:20px;background:rgba(56,139,253,0.1);border:1px solid rgba(56,139,253,0.2);border-radius:6px;padding:6px 10px;">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--accent2);">10K+ Users</div>
+
+        <div class="carousel-controls">
+          <button class="carousel-btn" onclick="prevSlide('jhk')" aria-label="Previous">‹</button>
+          <button class="carousel-btn" onclick="nextSlide('jhk')" aria-label="Next">›</button>
         </div>
       </div>
+
       <div class="app-info">
-        <div class="app-badge">Health Insurance · Live</div>
-        <div class="app-name">Jubilee Health Key</div>
-        <p class="app-desc">Digital health insurance management platform for Jubilee Life Insurance. Policy management, hospital network search, claims processing, biometric authentication, and real-time claim tracking.</p>
+        <div class="app-badge-pill"><span class="live-dot"></span>Insurance · Live</div>
+        <div class="app-name">JForce by Jubilee</div>
+        <p class="app-desc">All-in-one agents platform for seamless insurance management — agency operations, LMS integration, retail acquisition, policy servicing, renewals, commissions, and AI-powered knowledge base.</p>
         <div class="app-tags">
-          <span class="app-tag">Kotlin</span>
-          <span class="app-tag">Jetpack Compose</span>
-          <span class="app-tag">MVVM</span>
-          <span class="app-tag">Biometric Auth</span>
-          <span class="app-tag">SSL Pinning</span>
-          <span class="app-tag">Hilt</span>
+          <span class="app-tag">Kotlin</span><span class="app-tag">Jetpack Compose</span><span class="app-tag">MVVM</span>
+          <span class="app-tag">Hilt</span><span class="app-tag">SSL Pinning</span><span class="app-tag">Biometric Auth</span>
         </div>
-        <a href="https://play.google.com/store/apps/details?id=com.ozonedDigital.jhk" target="_blank" class="app-store-link">
-          ▶ View on Google Play ↗
-        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.ozonedDigital.jhk" target="_blank" rel="noopener" class="app-store-btn">▶ View on Google Play ↗</a>
       </div>
     </div>
 
-    <!-- App 2: Jubilee Active -->
-    <div class="app-card">
-      <div class="phone-frame-wrapper">
+    <!-- ── Card 2: Jubilee Active ── -->
+    <div class="app-card card-active reveal" style="transition-delay:0.1s">
+      <div class="phone-stage">
+        <div class="float-badge badge-tl" style="color:#c792ea;background:rgba(139,47,201,0.12);border-color:rgba(139,47,201,0.3);">★ 3.9 · Lifestyle</div>
+        <div class="float-badge badge-br">100K+ Downloads</div>
+
         <div class="phone-device">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="app-ui-fallback" style="background: linear-gradient(170deg, #1a0533 0%, #2d0a52 40%, #1a0533 100%);">
-              <div style="background: rgba(80,20,140,0.5); padding: 28px 10px 10px 10px;">
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
-                  <span style="font-size:7px;color:rgba(255,255,255,0.5);">9:41</span>
-                  <span style="font-size:6px;color:rgba(255,255,255,0.5);">●●●</span>
-                </div>
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <div style="width:20px;height:20px;border-radius:5px;background:linear-gradient(135deg,#8b2fc9,#6a1fa0);display:flex;align-items:center;justify-content:center;font-size:11px;">✦</div>
-                  <div>
-                    <div style="font-size:7px;font-weight:700;color:#fff;letter-spacing:0.04em;">Jubilee Active</div>
-                    <div style="font-size:5px;color:rgba(255,255,255,0.45);">Insurance + Wellness</div>
-                  </div>
-                  <div style="margin-left:auto;background:rgba(61,220,132,0.2);border-radius:10px;padding:2px 7px;">
-                    <span style="font-size:5px;color:#3ddc84;">ACTIVE</span>
-                  </div>
-                </div>
-              </div>
-              <div style="padding:6px 8px;flex:1;">
-                <div style="background:linear-gradient(135deg,rgba(130,40,200,0.5),rgba(80,20,140,0.3));border:1px solid rgba(180,100,255,0.2);border-radius:10px;padding:10px;margin-bottom:6px;">
-                  <div style="font-size:5.5px;color:rgba(255,255,255,0.5);margin-bottom:4px;font-family:'IBM Plex Mono',monospace;">DAILY WELLNESS SCORE</div>
-                  <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:6px;">
-                    <div style="font-size:20px;font-weight:800;color:#fff;">87</div>
-                    <div style="font-size:5.5px;color:rgba(255,255,255,0.5);">/ 100</div>
-                    <div style="margin-left:auto;font-size:5.5px;color:#3ddc84;">↑ +3 today</div>
-                  </div>
-                  <div style="background:rgba(255,255,255,0.1);border-radius:4px;height:4px;overflow:hidden;">
-                    <div style="background:linear-gradient(90deg,#8b2fc9,#3ddc84);width:87%;height:100%;border-radius:4px;"></div>
-                  </div>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:5px;">
-                  <div style="background:rgba(255,255,255,0.06);border-radius:7px;padding:7px;">
-                    <div style="font-size:10px;margin-bottom:2px;">👣</div>
-                    <div style="font-size:8px;font-weight:700;color:#fff;">7,842</div>
-                    <div style="font-size:4.5px;color:rgba(255,255,255,0.4);">Steps Today</div>
-                  </div>
-                  <div style="background:rgba(255,255,255,0.06);border-radius:7px;padding:7px;">
-                    <div style="font-size:10px;margin-bottom:2px;">🔥</div>
-                    <div style="font-size:8px;font-weight:700;color:#ff8c42;">324</div>
-                    <div style="font-size:4.5px;color:rgba(255,255,255,0.4);">Calories</div>
-                  </div>
-                </div>
-                <div style="background:rgba(255,255,255,0.05);border-radius:7px;padding:8px;">
-                  <div style="font-size:5.5px;color:rgba(255,255,255,0.4);margin-bottom:5px;font-family:'IBM Plex Mono',monospace;">ACTIVE POLICY</div>
-                  <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div>
-                      <div style="font-size:6px;color:#fff;font-weight:600;">Term Life · Gold</div>
-                      <div style="font-size:5px;color:rgba(255,255,255,0.4);">Premium due: Jan 15</div>
-                    </div>
-                    <div style="background:#8b2fc9;border-radius:5px;padding:4px 8px;">
-                      <span style="font-size:5.5px;color:#fff;">Pay Now</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div style="background:rgba(0,0,0,0.3);padding:8px;display:flex;justify-content:space-around;border-top:1px solid rgba(255,255,255,0.08);">
-                <div style="text-align:center"><div style="font-size:12px;">🏠</div><div style="font-size:4px;color:#8b2fc9;">Home</div></div>
-                <div style="text-align:center"><div style="font-size:12px;">❤️</div><div style="font-size:4px;color:rgba(255,255,255,0.4);">Wellness</div></div>
-                <div style="text-align:center"><div style="font-size:12px;">📄</div><div style="font-size:4px;color:rgba(255,255,255,0.4);">Policy</div></div>
-                <div style="text-align:center"><div style="font-size:12px;">👤</div><div style="font-size:4px;color:rgba(255,255,255,0.4);">Profile</div></div>
-              </div>
+          <div class="phone-island"></div>
+          <div class="screen-carousel">
+            <div class="slides-track" id="track-active">
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/krVfrmL5PqXJU5X79RNIIu4xvhgGIz3dQTuxRVzqnlSkPzaROTnugN5UPvECVuBBEgOLl30VklUXREviE2DKQg=w526-h296" alt="Jubilee Active screen 1" loading="eager"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/ui4fsGTj2fTRRdva2ZLZxc3wbDFIsDm61dxRZw4MXNdhj2rvM5GfPjDIOQewDXtuVFB0xb5v17yYqDqMn-Yw0lQ=w526-h296" alt="Jubilee Active screen 2" loading="lazy"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/sWboMQgun_B0Nzb5lBAUOJsbo0ue9q4p7lOVt4wY0f7r8GRg58seiiXRwt2SNY2hkV2jaDMPcjyAwhpW42PUYDA=w526-h296" alt="Jubilee Active screen 3" loading="lazy"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/dRX_MdWkx4zQstlzE6-h408LYPkB7_Px8szPyQScfEvhfRyLR7zsUVjs4BrTYuTIYbhMSTT7tqB9Bnw_ZOHg=w526-h296" alt="Jubilee Active screen 4" loading="lazy"></div>
+              <div class="slide"><img src="https://play-lh.googleusercontent.com/hFA9sLBg3czVW4RXqDLDsbmx8FnP9F0b1Wgqfzx23bGu0eKr3ZR6ADwuOmmnKrPQvHcwPJCpx4XF0seXqliBxQ=w526-h296" alt="Jubilee Active screen 5" loading="lazy"></div>
             </div>
+            <div class="slide-dots" id="dots-active"></div>
           </div>
         </div>
-        <div class="phone-glow" style="background:#8b2fc9;"></div>
-        <div style="position:absolute;top:20px;left:20px;background:rgba(139,47,201,0.15);border:1px solid rgba(139,47,201,0.3);border-radius:6px;padding:6px 10px;">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:#c792ea;">★ 4.3 Rating</div>
-        </div>
-        <div style="position:absolute;bottom:24px;right:20px;background:rgba(56,139,253,0.1);border:1px solid rgba(56,139,253,0.2);border-radius:6px;padding:6px 10px;">
-          <div style="font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--accent2);">5K+ Users</div>
+
+        <div class="carousel-controls">
+          <button class="carousel-btn" onclick="prevSlide('active')" aria-label="Previous">‹</button>
+          <button class="carousel-btn" onclick="nextSlide('active')" aria-label="Next">›</button>
         </div>
       </div>
+
       <div class="app-info">
-        <div class="app-badge">Life Insurance · Live</div>
+        <div class="app-badge-pill" style="background:rgba(139,47,201,0.08);border-color:rgba(139,47,201,0.22);color:#c792ea;"><span class="live-dot" style="background:#c792ea;"></span>Wellness · Live</div>
         <div class="app-name">Jubilee Active</div>
-        <p class="app-desc">Wellness-integrated life insurance platform for Jubilee Life. Tracks daily health activity, rewards policyholders for healthy lifestyles, with integrated policy management and premium payments.</p>
+        <p class="app-desc">Wellness-integrated life insurance platform. Tracks steps, calories and fitness; rewards healthy habits with redeemable points. Built-in policy management, digital product store, and premium payments.</p>
         <div class="app-tags">
-          <span class="app-tag">Kotlin</span>
-          <span class="app-tag">Jetpack Compose</span>
-          <span class="app-tag">Clean Arch</span>
-          <span class="app-tag">Health APIs</span>
-          <span class="app-tag">UBL Checkout</span>
-          <span class="app-tag">Room DB</span>
+          <span class="app-tag">Kotlin</span><span class="app-tag">Jetpack Compose</span><span class="app-tag">Clean Arch</span>
+          <span class="app-tag">Health APIs</span><span class="app-tag">UBL Checkout</span><span class="app-tag">Room DB</span>
         </div>
-        <a href="https://play.google.com/store/apps/details?id=com.ozoneddigital.jubileeactive" target="_blank" class="app-store-link">
-          ▶ View on Google Play ↗
-        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.ozoneddigital.jubileeactive" target="_blank" rel="noopener" class="app-store-btn" style="background:#8b2fc9;">▶ View on Google Play ↗</a>
       </div>
     </div>
 
@@ -1028,20 +930,19 @@
 </footer>
 
 <script>
-  // Cursor — rAF-based, single listener
+  /* ── Custom cursor ── */
   const cursor = document.getElementById('cursor');
-  const ring = document.getElementById('cursorRing');
+  const ring   = document.getElementById('cursorRing');
   let mx = 0, my = 0, rx = 0, ry = 0;
   document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; }, { passive: true });
-  function animCursor() {
-    cursor.style.transform = `translate(${mx - 5}px, ${my - 5}px)`;
+  (function animCursor() {
+    cursor.style.transform = `translate(${mx - 5}px,${my - 5}px)`;
     rx += (mx - rx) * 0.1; ry += (my - ry) * 0.1;
-    ring.style.transform = `translate(${rx - 16}px, ${ry - 16}px)`;
+    ring.style.transform = `translate(${rx - 16}px,${ry - 16}px)`;
     requestAnimationFrame(animCursor);
-  }
-  animCursor();
+  })();
 
-  // Tab switching
+  /* ── Skills tabs ── */
   function switchTab(e, id) {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -1049,21 +950,73 @@
     document.getElementById('tab-' + id).classList.add('active');
   }
 
-  // Scroll reveal — passive observer
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
-  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.reveal').forEach(r => observer.observe(r));
+  /* ── Carousel ── */
+  const carousels = {
+    jhk:    { current: 0, total: 5, timer: null },
+    active: { current: 0, total: 5, timer: null }
+  };
 
-  // Active nav — throttled scroll
-  const sections = [...document.querySelectorAll('section[id]')];
-  const navLinks = [...document.querySelectorAll('.nav-links a')];
+  function buildDots(id) {
+    const wrap = document.getElementById('dots-' + id);
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (let i = 0; i < carousels[id].total; i++) {
+      const d = document.createElement('div');
+      d.className = 'slide-dot' + (i === 0 ? ' active' : '');
+      d.addEventListener('click', () => { goTo(id, i); resetTimer(id); });
+      wrap.appendChild(d);
+    }
+  }
+
+  function goTo(id, index) {
+    const c = carousels[id];
+    c.current = ((index % c.total) + c.total) % c.total;
+    const track = document.getElementById('track-' + id);
+    if (track) track.style.transform = `translateX(-${c.current * 100}%)`;
+    document.querySelectorAll('#dots-' + id + ' .slide-dot').forEach((d, i) =>
+      d.classList.toggle('active', i === c.current)
+    );
+  }
+
+  function nextSlide(id) { goTo(id, carousels[id].current + 1); resetTimer(id); }
+  function prevSlide(id) { goTo(id, carousels[id].current - 1); resetTimer(id); }
+
+  function startTimer(id, ms) {
+    carousels[id].timer = setInterval(() => goTo(id, carousels[id].current + 1), ms);
+  }
+  function resetTimer(id) {
+    clearInterval(carousels[id].timer);
+    startTimer(id, 3500);
+  }
+
+  /* Init carousels */
+  buildDots('jhk');
+  buildDots('active');
+  startTimer('jhk', 3000);
+  startTimer('active', 3700); /* offset so they don't slide in sync */
+
+  /* Pause on hover */
+  document.querySelectorAll('.app-card').forEach(card => {
+    const id = card.classList.contains('card-jhk') ? 'jhk' : 'active';
+    card.addEventListener('mouseenter', () => clearInterval(carousels[id].timer));
+    card.addEventListener('mouseleave', () => startTimer(id, 3500));
+  });
+
+  /* ── Scroll reveal ── */
+  const revealObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); } });
+  }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(r => revealObs.observe(r));
+
+  /* ── Active nav highlight ── */
+  const allSections = [...document.querySelectorAll('section[id]')];
+  const navLinks    = [...document.querySelectorAll('.nav-links a')];
   let ticking = false;
   window.addEventListener('scroll', () => {
     if (!ticking) {
       requestAnimationFrame(() => {
         let current = '';
-        sections.forEach(s => { if (window.scrollY >= s.offsetTop - 130) current = s.id; });
+        allSections.forEach(s => { if (window.scrollY >= s.offsetTop - 130) current = s.id; });
         navLinks.forEach(l => { l.style.color = l.getAttribute('href') === '#' + current ? 'var(--accent)' : ''; });
         ticking = false;
       });
