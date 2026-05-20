@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Cashlytics</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0C0A1A;
+      --bg2: #14112A;
+      --bg3: #1C1830;
+      --border: rgba(255,255,255,0.08);
+      --teal: #4DD9AC;
+      --teal-dim: rgba(77,217,172,0.12);
+      --purple: #7F77DD;
+      --text: #F0EEF8;
+      --text-muted: rgba(240,238,248,0.55);
+      --text-dim: rgba(240,238,248,0.35);
+      --radius: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    a { color: var(--teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-mark {
+      width: 40px; height: 40px;
+      background: var(--teal);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 700; color: #0C0A1A;
+      flex-shrink: 0;
+    }
+
+    header h1 {
+      font-size: 18px; font-weight: 600; color: var(--text);
+    }
+    header p {
+      font-size: 13px; color: var(--text-muted);
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .hero {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      margin-bottom: 40px;
+    }
+
+    .hero h2 {
+      font-size: 26px; font-weight: 600; color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .hero p {
+      font-size: 15px; color: var(--text-muted); max-width: 560px;
+      margin-bottom: 16px;
+    }
+
+    .badges {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+
+    .badge {
+      font-size: 12px; font-weight: 500;
+      padding: 4px 12px; border-radius: 20px;
+      border: 1px solid rgba(77,217,172,0.3);
+      color: var(--teal);
+      background: var(--teal-dim);
+    }
+
+    .effective {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-top: 16px;
+    }
+
+    .toc {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 40px;
+    }
+
+    .toc h3 {
+      font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .toc ol {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 6px;
+      counter-reset: toc;
+    }
+
+    .toc ol li::before {
+      counter-increment: toc;
+      content: counter(toc) ".";
+      color: var(--teal);
+      font-size: 13px;
+      margin-right: 8px;
+      font-weight: 600;
+    }
+
+    .toc a {
+      font-size: 14px; color: var(--text-muted);
+    }
+
+    .toc a:hover { color: var(--teal); }
+
+    section {
+      margin-bottom: 40px;
+    }
+
+    section h2 {
+      font-size: 19px; font-weight: 600; color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    section h2 .num {
+      font-size: 12px; font-weight: 700;
+      background: var(--teal-dim); color: var(--teal);
+      width: 24px; height: 24px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    section p { font-size: 15px; color: var(--text-muted); margin-bottom: 12px; }
+    section p:last-child { margin-bottom: 0; }
+
+    ul.policy-list {
+      list-style: none;
+      display: flex; flex-direction: column; gap: 8px;
+      margin: 12px 0;
+    }
+
+    ul.policy-list li {
+      font-size: 15px; color: var(--text-muted);
+      padding-left: 20px; position: relative;
+    }
+
+    ul.policy-list li::before {
+      content: "•";
+      color: var(--teal);
+      position: absolute; left: 0;
+    }
+
+    .highlight-box {
+      background: var(--teal-dim);
+      border: 1px solid rgba(77,217,172,0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 15px;
+      color: #9FE1CB;
+    }
+
+    .highlight-box strong {
+      color: var(--teal);
+    }
+
+    .warning-box {
+      background: rgba(127,119,221,0.1);
+      border: 1px solid rgba(127,119,221,0.2);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 15px;
+      color: #AFA9EC;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 16px 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%; border-collapse: collapse; font-size: 14px;
+    }
+
+    thead tr { background: var(--bg3); }
+    thead th {
+      text-align: left; padding: 11px 14px;
+      font-size: 12px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--text-dim);
+    }
+
+    tbody tr { border-top: 1px solid var(--border); }
+    tbody td { padding: 11px 14px; color: var(--text-muted); vertical-align: top; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    td.purpose { color: var(--teal); font-size: 13px; }
+
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      text-align: center;
+    }
+
+    footer p {
+      font-size: 13px; color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    footer a { color: var(--teal); }
+
+    @media (max-width: 600px) {
+      .hero { padding: 20px; }
+      .hero h2 { font-size: 22px; }
+      .container { padding: 32px 16px 60px; }
+      section h2 { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">C</div>
+  <div>
+    <h1>Cashlytics</h1>
+    <p>Finance &amp; Notes</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="hero">
+    <h2>Privacy Policy</h2>
+    <p>We built Cashlytics on a simple promise: your financial data belongs to you and only you. This policy explains exactly what we collect, what we don't, and why.</p>
+    <div class="badges">
+      <span class="badge">No ads</span>
+      <span class="badge">No data selling</span>
+      <span class="badge">Offline first</span>
+      <span class="badge">Your Drive, your backup</span>
+    </div>
+    <p class="effective">Effective date: May 20, 2026 &nbsp;·&nbsp; Last updated: May 20, 2026</p>
+  </div>
+
+  <div class="toc">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#data-collected">Data we collect</a></li>
+      <li><a href="#data-not-collected">Data we do NOT collect</a></li>
+      <li><a href="#permissions">App permissions explained</a></li>
+      <li><a href="#google-drive">Google Drive backup</a></li>
+      <li><a href="#data-storage">How your data is stored</a></li>
+      <li><a href="#third-parties">Third-party services</a></li>
+      <li><a href="#children">Children's privacy</a></li>
+      <li><a href="#your-rights">Your rights</a></li>
+      <li><a href="#changes">Changes to this policy</a></li>
+      <li><a href="#contact">Contact us</a></li>
+    </ol>
+  </div>
+
+  <section id="overview">
+    <h2><span class="num">1</span> Overview</h2>
+    <p>Cashlytics ("we", "our", "the app") is a personal finance ledger and smart notebook application developed for Android. We are committed to protecting your privacy.</p>
+    <div class="highlight-box">
+      <strong>The short version:</strong> Cashlytics stores all your data locally on your device. We do not operate servers that store your personal information. We do not collect analytics, sell data, or show ads. The only optional cloud interaction is a backup you explicitly initiate to your own personal Google Drive account.
+    </div>
+  </section>
+
+  <section id="data-collected">
+    <h2><span class="num">2</span> Data we collect</h2>
+    <p>Cashlytics collects and stores the following data <strong>locally on your device only</strong>:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data type</th>
+            <th>Purpose</th>
+            <th>Where stored</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Transaction records (person name, amount, date, direction)</td>
+            <td class="purpose">Finance ledger functionality</td>
+            <td>On-device (Room database)</td>
+          </tr>
+          <tr>
+            <td>Expense entries (amount, category, description)</td>
+            <td class="purpose">Personal spending tracker</td>
+            <td>On-device (Room database)</td>
+          </tr>
+          <tr>
+            <td>Notebook entries (text, keywords, category)</td>
+            <td class="purpose">Smart notebook functionality</td>
+            <td>On-device (Room database)</td>
+          </tr>
+          <tr>
+            <td>Voice input (microphone audio)</td>
+            <td class="purpose">Converted to text on-device; audio is never stored or transmitted</td>
+            <td>Processed locally, discarded immediately</td>
+          </tr>
+          <tr>
+            <td>Google account identifier (if Drive backup enabled)</td>
+            <td class="purpose">To authenticate and write backup to your personal Drive</td>
+            <td>Your Google account only</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="data-not-collected">
+    <h2><span class="num">3</span> Data we do NOT collect</h2>
+    <p>We want to be explicit. Cashlytics does <strong>not</strong> collect, transmit, or store any of the following:</p>
+    <ul class="policy-list">
+      <li>Your name, email address, or any account information</li>
+      <li>Device identifiers, advertising IDs, or fingerprints</li>
+      <li>Location data of any kind</li>
+      <li>Usage analytics, crash reports, or telemetry</li>
+      <li>Contact list or phone book data</li>
+      <li>Browsing history or app usage data</li>
+      <li>Any data sent to our servers — we do not operate any backend servers</li>
+    </ul>
+  </section>
+
+  <section id="permissions">
+    <h2><span class="num">4</span> App permissions explained</h2>
+    <p>Cashlytics requests the following Android permissions:</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Permission</th>
+            <th>Why it's needed</th>
+            <th>Optional?</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>RECORD_AUDIO</code></td>
+            <td>Enables voice input for transactions and notebook entries. Audio is processed locally by Android's SpeechRecognizer and never stored or sent anywhere.</td>
+            <td>Yes — you can use text input instead</td>
+          </tr>
+          <tr>
+            <td><code>POST_NOTIFICATIONS</code></td>
+            <td>Used to send budget alert notifications if you configure spending limits.</td>
+            <td>Yes — alerts are opt-in</td>
+          </tr>
+          <tr>
+            <td><code>WRITE_EXTERNAL_STORAGE</code></td>
+            <td>Required on Android 9 and below to save exported PDF and Excel files to your device storage.</td>
+            <td>Yes — only needed for export on older Android</td>
+          </tr>
+          <tr>
+            <td>Google Sign-In (via Google API)</td>
+            <td>Used only if you choose to enable Google Drive backup. We request the minimum scope needed to write a backup file to your Drive.</td>
+            <td>Yes — backup is fully optional</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>No permission is required to use the core finance ledger or notebook features.</p>
+  </section>
+
+  <section id="google-drive">
+    <h2><span class="num">5</span> Google Drive backup</h2>
+    <p>Cashlytics offers an optional feature to back up your data to Google Drive. Here is exactly how it works:</p>
+    <ul class="policy-list">
+      <li>The backup feature is entirely opt-in. It is off by default.</li>
+      <li>When enabled, Cashlytics requests access to a private, app-specific folder in your Google Drive. Only Cashlytics can read files written to this folder.</li>
+      <li>The backup file contains your ledger entries and notebook entries in an encrypted format.</li>
+      <li>We never access, read, or transmit your Google Drive files. The backup is written directly from your device to your Drive using Google's official API.</li>
+      <li>You can revoke Drive access at any time via your Google account settings at <a href="https://myaccount.google.com/permissions" target="_blank">myaccount.google.com/permissions</a>.</li>
+      <li>Deleting the app or revoking access does not automatically delete your backup file from Drive — you can delete it manually from your Google Drive.</li>
+    </ul>
+    <div class="warning-box">
+      Cashlytics's use of Google APIs complies with the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">Google API Services User Data Policy</a>, including the Limited Use requirements.
+    </div>
+  </section>
+
+  <section id="data-storage">
+    <h2><span class="num">6</span> How your data is stored</h2>
+    <p>All app data is stored in a local SQLite database managed by Android Room on your device. This database is stored in the app's private storage directory, which is:</p>
+    <ul class="policy-list">
+      <li>Not accessible to other apps (enforced by Android's security model)</li>
+      <li>Automatically deleted if you uninstall Cashlytics</li>
+      <li>Included in Android's standard device backup if you have that enabled in your Android system settings</li>
+    </ul>
+    <p>Exported files (PDF and Excel) are saved to <code>Android/data/com.expensetracker/files/</code> on your device storage and are accessible only to you.</p>
+  </section>
+
+  <section id="third-parties">
+    <h2><span class="num">7</span> Third-party services</h2>
+    <p>Cashlytics does not integrate with any advertising networks, analytics platforms, or data brokers.</p>
+    <p>The only third-party service the app can interact with is <strong>Google Drive</strong>, and only when you explicitly enable the backup feature. This interaction is governed by <a href="https://policies.google.com/privacy" target="_blank">Google's Privacy Policy</a>.</p>
+    <p>The natural language processing (NLP) that parses your transactions and notebook entries runs entirely on-device. No text is sent to any external AI or cloud API.</p>
+  </section>
+
+  <section id="children">
+    <h2><span class="num">8</span> Children's privacy</h2>
+    <p>Cashlytics is not directed at children under the age of 13. We do not knowingly collect personal information from children. Because the app stores all data locally and does not transmit data to our servers, there is no mechanism by which we would receive data from any user, regardless of age.</p>
+    <p>If you believe a child has provided personal information through this app, please contact us and we will assist in addressing the concern.</p>
+  </section>
+
+  <section id="your-rights">
+    <h2><span class="num">9</span> Your rights</h2>
+    <p>Because all data is stored on your own device, you have full control:</p>
+    <ul class="policy-list">
+      <li><strong>Access:</strong> All your data is visible directly within the app.</li>
+      <li><strong>Delete:</strong> You can delete individual entries via swipe-to-delete, or delete all data by uninstalling the app.</li>
+      <li><strong>Export:</strong> You can export your full data as a PDF or Excel file at any time.</li>
+      <li><strong>Portability:</strong> Exported files are in standard formats (PDF, XLSX) you can use anywhere.</li>
+      <li><strong>Revoke backup access:</strong> You can disconnect Google Drive at any time from within the app's Backup &amp; Restore screen.</li>
+    </ul>
+    <p>There is no account to delete because we do not create accounts. Uninstalling the app removes all locally stored data.</p>
+  </section>
+
+  <section id="changes">
+    <h2><span class="num">10</span> Changes to this policy</h2>
+    <p>We may update this Privacy Policy from time to time. When we do, we will update the "Last updated" date at the top of this page and, where appropriate, notify you through the app.</p>
+    <p>We encourage you to review this page periodically. Continued use of the app after any changes constitutes acceptance of the updated policy.</p>
+  </section>
+
+  <section id="contact">
+    <h2><span class="num">11</span> Contact us</h2>
+    <p>If you have any questions about this Privacy Policy or how Cashlytics handles your data, please contact us:</p>
+    <div class="highlight-box">
+      <strong>Email:</strong> <a href="mailto:privacy@cashlytics.app">privacy@cashlytics.app</a><br>
+      <strong>App:</strong> Cashlytics — Finance &amp; Notes<br>
+      <strong>Package:</strong> com.expensetracker
+    </div>
+    <p>We aim to respond to all privacy-related inquiries within 7 business days.</p>
+  </section>
+
+</div>
+
+<footer>
+  <p>&copy; 2026 Cashlytics. All rights reserved.</p>
+  <p>This privacy policy was last updated on May 20, 2026.</p>
+  <p style="margin-top:8px"><a href="#overview">Back to top</a></p>
+</footer>
+
+</body>
+</html>
