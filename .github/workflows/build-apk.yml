@@ -61,19 +61,37 @@ jobs:
 
       - name: Build Free Debug APK
         if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'free-debug' || github.event_name != 'workflow_dispatch' }}
-        run: ./gradlew assembleFreeDebug --stacktrace
+        run: ./gradlew assembleFreeDebug --info --stacktrace 2>&1 | tee build-free-debug.log
 
       - name: Build Pro Debug APK
         if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'pro-debug' || github.event_name != 'workflow_dispatch' }}
-        run: ./gradlew assembleProDebug --stacktrace
+        run: ./gradlew assembleProDebug --info --stacktrace 2>&1 | tee build-pro-debug.log
 
       - name: Build Free Release APK (unsigned)
         if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'free-release' }}
-        run: ./gradlew assembleFreeRelease --stacktrace
+        run: ./gradlew assembleFreeRelease --info --stacktrace 2>&1 | tee build-free-release.log
 
       - name: Build Pro Release APK (unsigned)
         if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'pro-release' }}
-        run: ./gradlew assembleProRelease --stacktrace
+        run: ./gradlew assembleProRelease --info --stacktrace 2>&1 | tee build-pro-release.log
+
+      - name: Extract compile errors on failure
+        if: failure()
+        run: |
+          echo "::group::First 200 lines of 'e: file://' compile errors"
+          grep -h "^e: \|^error: \|\[ksp\]\|Unresolved reference\|Cannot find\|Could not resolve" build-*.log 2>/dev/null | head -200 || echo "no error pattern matched"
+          echo "::endgroup::"
+          echo "::group::Last 150 lines of build log"
+          tail -150 build-*.log 2>/dev/null | head -300 || true
+          echo "::endgroup::"
+
+      - name: Upload full build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: PosInventoryApp/build-*.log
+          if-no-files-found: ignore
 
       - name: List generated APKs
         if: always()
