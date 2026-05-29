@@ -23,11 +23,6 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        // Room schema export directory
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
     }
 
     buildTypes {

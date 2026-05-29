@@ -21,10 +21,6 @@
     <!-- Vibration for scanner feedback -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Foreground service for long-running exports/imports -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-
     <!-- Billing -->
     <uses-permission android:name="com.android.vending.BILLING" />
 
@@ -74,12 +70,6 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
-
-        <!-- Foreground service for data export/import -->
-        <service
-            android:name=".service.DataSyncService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
 
     </application>
 
