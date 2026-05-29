@@ -1,5 +1,5 @@
 # ============================================================================
-# Cashlytics ProGuard / R8 Rules
+# Vyntra ProGuard / R8 Rules
 # ============================================================================
 
 # ---- General Android ----
@@ -11,7 +11,7 @@
 -keepattributes EnclosingMethod
 
 # Keep the application class
--keep class com.khalid.cashlytics.CashlyticsApp { *; }
+-keep class com.khalid.vyntra.VyntraApp { *; }
 
 # ---- Kotlin ----
 -dontwarn kotlin.**
@@ -114,8 +114,8 @@
 
 # ---- Data Models ----
 # Keep all data classes in the model package (Room entities, DTOs, etc.)
--keep class com.khalid.cashlytics.data.model.** { *; }
--keep class com.khalid.cashlytics.domain.model.** { *; }
+-keep class com.khalid.vyntra.data.model.** { *; }
+-keep class com.khalid.vyntra.domain.model.** { *; }
 
 # ---- Enums ----
 -keepclassmembers enum * {

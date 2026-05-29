@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "com.khalid.cashlytics"
+    namespace = "com.khalid.vyntra"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.khalid.cashlytics"
+        applicationId = "com.khalid.vyntra"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

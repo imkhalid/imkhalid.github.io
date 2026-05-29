@@ -1,4 +1,4 @@
-Cashlytics is a powerful, offline-first Point of Sale (POS) and Inventory Management system built for small to medium businesses. Whether you run a retail shop, grocery store, pharmacy, or wholesale business — Cashlytics puts complete business control in your pocket.
+Vyntra is a powerful, offline-first Point of Sale (POS) and Inventory Management system built for small to medium businesses. Whether you run a retail shop, grocery store, pharmacy, or wholesale business — Vyntra puts complete business control in your pocket.
 
 No internet required. No monthly fees. Your data stays on your device.
 
@@ -93,12 +93,12 @@ BUSINESS SETTINGS
 ━━━━━━━━━━━━━━━━━━━━
 FREE & PRO
 ━━━━━━━━━━━━━━━━━━━━
-Cashlytics is free to use with generous limits:
+Vyntra is free to use with generous limits:
 • Free: Up to 10 inventory changes and 5 report views per month
 • Pro: Unlimited everything + no ads — one-time purchase, no subscription!
 
 ━━━━━━━━━━━━━━━━━━━━
-WHY CASHLYTICS?
+WHY VYNTRA?
 ━━━━━━━━━━━━━━━━━━━━
 ✓ Works completely offline — no internet needed
 ✓ All data stored locally on your device — your data is yours
@@ -107,4 +107,4 @@ WHY CASHLYTICS?
 ✓ No monthly subscription — Pro is a one-time purchase
 ✓ Perfect for retail shops, groceries, pharmacies, electronics stores, wholesale businesses, and more
 
-Download Cashlytics today and take control of your business!
+Download Vyntra today and take control of your business!
