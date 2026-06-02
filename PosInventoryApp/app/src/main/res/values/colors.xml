@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Window background. Referenced from themes.xml so the activity's
+        windowBackground matches the Compose dark surface. The app currently
+        ships dark by default, so we use a single value for both modes; if a
+        true light variant is added later, create values-night/colors.xml.
+    -->
+    <color name="window_background">#12121E</color>
+</resources>

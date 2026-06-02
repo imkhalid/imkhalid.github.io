@@ -35,6 +35,21 @@ class PreferencesManager @Inject constructor(
         val INVENTORY_WRITE_COUNT = intPreferencesKey("inventory_write_count")
         val REPORT_VIEW_COUNT = intPreferencesKey("report_view_count")
         val LAST_RESET_DATE = longPreferencesKey("last_reset_date")
+        val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
+    }
+
+    // ── Onboarding ──────────────────────────────────────────────────────
+
+    /**
+     * Whether the user has completed (or skipped) the first-launch welcome
+     * flow. Read by MainActivity to gate the OnboardingScreen vs. main UI.
+     */
+    val hasSeenOnboarding: Flow<Boolean> = dataStore.data.map { prefs ->
+        prefs[Keys.HAS_SEEN_ONBOARDING] == true
+    }
+
+    suspend fun setHasSeenOnboarding(seen: Boolean) {
+        dataStore.edit { prefs -> prefs[Keys.HAS_SEEN_ONBOARDING] = seen }
     }
 
     // ── Business Info ───────────────────────────────────────────────────

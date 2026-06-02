@@ -93,7 +93,7 @@ class BillingManager @Inject constructor(
 
     private fun handlePurchase(purchase: Purchase) {
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
-            scope.launch { preferencesManager.setIsProUser(true) }
+            scope.launch { preferencesManager.setProUser(true) }
             if (!purchase.isAcknowledged) {
                 val acknowledgePurchaseParams = AcknowledgePurchaseParams.newBuilder()
                     .setPurchaseToken(purchase.purchaseToken)
@@ -101,6 +101,15 @@ class BillingManager @Inject constructor(
                 billingClient.acknowledgePurchase(acknowledgePurchaseParams) { }
             }
         }
+    }
+
+    /**
+     * Public entry point for the "Restore Purchases" button in PremiumScreen.
+     * Queries Play Billing for any historical IAP and re-applies Pro status.
+     * Safe to call repeatedly — only flips the Pro flag on a positive match.
+     */
+    fun restorePurchases() {
+        checkExistingPurchases()
     }
 
     private fun checkExistingPurchases() {
@@ -114,7 +123,7 @@ class BillingManager @Inject constructor(
                 it.purchaseState == Purchase.PurchaseState.PURCHASED
             }
             if (hasPro) {
-                scope.launch { preferencesManager.setIsProUser(true) }
+                scope.launch { preferencesManager.setProUser(true) }
             }
         }
     }

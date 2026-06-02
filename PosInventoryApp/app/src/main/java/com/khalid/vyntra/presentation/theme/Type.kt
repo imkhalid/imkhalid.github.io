@@ -2,14 +2,31 @@ package com.khalid.vyntra.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.sp
+import com.khalid.vyntra.R
 
-// Using the default sans-serif family which maps to Roboto on Android.
-// If custom fonts are added later, update this FontFamily reference.
-val VyntraFontFamily = FontFamily.Default
+// Plus Jakarta Sans via Google Fonts. Downloaded on first launch then cached
+// by the Google Play Services font provider; falls back to the platform default
+// if the device is offline the very first time the app runs.
+private val fontProvider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+private val JakartaGoogleFont = GoogleFont("Plus Jakarta Sans")
+
+val VyntraFontFamily: FontFamily = FontFamily(
+    Font(googleFont = JakartaGoogleFont, fontProvider = fontProvider, weight = FontWeight.Normal),
+    Font(googleFont = JakartaGoogleFont, fontProvider = fontProvider, weight = FontWeight.Medium),
+    Font(googleFont = JakartaGoogleFont, fontProvider = fontProvider, weight = FontWeight.SemiBold),
+    Font(googleFont = JakartaGoogleFont, fontProvider = fontProvider, weight = FontWeight.Bold),
+    Font(googleFont = JakartaGoogleFont, fontProvider = fontProvider, weight = FontWeight.ExtraBold)
+)
 
 val VyntraTypography = Typography(
     displayLarge = TextStyle(

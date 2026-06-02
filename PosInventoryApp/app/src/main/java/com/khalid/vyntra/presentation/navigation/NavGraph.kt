@@ -73,9 +73,18 @@ fun VyntraNavGraph(
             CategoryScreen(navController = navController)
         }
 
-        // Customers
+        // Customers — these screens use callback-based navigation, not navController.
         composable(route = Screen.Customers.route) {
-            CustomerListScreen(navController = navController)
+            CustomerListScreen(
+                viewModel = androidx.hilt.navigation.compose.hiltViewModel(),
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddCustomer = {
+                    navController.navigate(Screen.AddEditCustomer.createRoute())
+                },
+                onNavigateToCustomerDetail = { customerId ->
+                    navController.navigate(Screen.CustomerDetail.createRoute(customerId))
+                }
+            )
         }
 
         composable(
@@ -84,7 +93,12 @@ fun VyntraNavGraph(
                 navArgument("customerId") { type = NavType.LongType }
             )
         ) {
-            CustomerDetailScreen(navController = navController)
+            CustomerDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEditCustomer = { customerId ->
+                    navController.navigate(Screen.AddEditCustomer.createRoute(customerId))
+                }
+            )
         }
 
         composable(
@@ -96,12 +110,23 @@ fun VyntraNavGraph(
                 }
             )
         ) {
-            AddEditCustomerScreen(navController = navController)
+            AddEditCustomerScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
-        // Vendors
+        // Vendors — same callback pattern as Customers.
         composable(route = Screen.Vendors.route) {
-            VendorListScreen(navController = navController)
+            VendorListScreen(
+                viewModel = androidx.hilt.navigation.compose.hiltViewModel(),
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddVendor = {
+                    navController.navigate(Screen.AddEditVendor.createRoute())
+                },
+                onNavigateToVendorDetail = { vendorId ->
+                    navController.navigate(Screen.VendorDetail.createRoute(vendorId))
+                }
+            )
         }
 
         composable(
@@ -110,7 +135,12 @@ fun VyntraNavGraph(
                 navArgument("vendorId") { type = NavType.LongType }
             )
         ) {
-            VendorDetailScreen(navController = navController)
+            VendorDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEditVendor = { vendorId ->
+                    navController.navigate(Screen.AddEditVendor.createRoute(vendorId))
+                }
+            )
         }
 
         composable(
@@ -122,7 +152,9 @@ fun VyntraNavGraph(
                 }
             )
         ) {
-            AddEditVendorScreen(navController = navController)
+            AddEditVendorScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
 
         // Sales / Invoices

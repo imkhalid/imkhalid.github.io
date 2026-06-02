@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    FileProvider paths.
+
+    Invoice PDFs are written to {cacheDir}/invoices by PdfGenerator. We expose
+    that directory (and the broader cache) so the share/print intents can
+    grant other apps temporary read access to the generated PDFs.
+-->
+<paths>
+    <cache-path name="invoices" path="invoices/" />
+    <cache-path name="shared_cache" path="." />
+    <files-path name="shared_files" path="shared/" />
+</paths>

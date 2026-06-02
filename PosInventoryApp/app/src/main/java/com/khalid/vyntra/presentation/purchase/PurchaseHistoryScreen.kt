@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ElevatedCard
@@ -95,6 +96,7 @@ fun PurchaseHistoryScreen(
             when {
                 uiState.isLoading -> LoadingIndicator()
                 uiState.purchases.isEmpty() -> EmptyStateView(
+                    icon = Icons.AutoMirrored.Filled.ReceiptLong,
                     title = "No Purchases",
                     message = "Record your first purchase to see history"
                 )

@@ -1,12 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Base application theme using Material 3 -->
-    <style name="Theme.Vyntra" parent="android:Theme.Material.Light.NoActionBar">
+    <!--
+        Activity theme. Parent is Theme.AppCompat.NoActionBar so the
+        manifest can route at @style/Theme.Vyntra and any future theme
+        tweaks live here in one place. The window items disable every
+        system-drawn title-bar surface so the Compose Scaffold owns the
+        whole window with no reserved chrome strip at the top.
+    -->
+    <style name="Theme.Vyntra" parent="Theme.AppCompat.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="actionBarSize">0dp</item>
+        <item name="android:windowBackground">@color/window_background</item>
     </style>
 
-    <!-- Splash screen theme -->
+    <!--
+        Splash theme. Initial theme on the MainActivity; the SplashScreen
+        library transitions to postSplashScreenTheme (Theme.Vyntra) after
+        the first frame so all the no-chrome rules above apply once
+        Compose takes over.
+    -->
     <style name="Theme.Vyntra.Splash" parent="Theme.SplashScreen">
         <item name="postSplashScreenTheme">@style/Theme.Vyntra</item>
     </style>

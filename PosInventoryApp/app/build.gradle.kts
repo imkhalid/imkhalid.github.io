@@ -4,7 +4,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt.android)
-    alias(libs.plugins.room)
+    // NOTE: do NOT enable the Room Gradle plugin (`alias(libs.plugins.room)`).
+    // It auto-passes the schema directory as an absolute path to KSP. Since
+    // this project's absolute path contains a space ("Android Projects"),
+    // KSP rejects the arg and the build fails. The Room schema location is
+    // set as a relative KSP arg below — that's all Room needs at compile time.
 }
 
 android {
@@ -22,6 +26,13 @@ android {
 
         vectorDrawables {
             useSupportLibrary = true
+        }
+
+        // Room schema export directory — relative path, NOT $projectDir,
+        // because KSP processor arg values can't contain spaces and the
+        // absolute path includes "Android Projects" with a space.
+        ksp {
+            arg("room.schemaLocation", "schemas")
         }
     }
 
@@ -94,9 +105,14 @@ android {
         }
     }
 
-    room {
-        schemaDirectory("$projectDir/schemas")
-    }
+    // NOTE: do NOT use the `room { schemaDirectory(...) }` plugin block here.
+    // The Room Gradle plugin always resolves the path to an absolute one, and
+    // this project's absolute path contains a space ("Android Projects") which
+    // makes KSP reject the processor argument:
+    //     Processor arguments not in the format \S+=\S+: room.internal.schemaInput=...
+    // Instead, the schema location is set as a relative KSP arg above
+    // (`ksp { arg("room.schemaLocation", "schemas") }`), which Room reads
+    // correctly without absolutization.
 }
 
 dependencies {
@@ -166,6 +182,15 @@ dependencies {
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
     implementation(libs.androidx.camera.mlkit.vision)
+
+    // Guava — exposes ListenableFuture for CameraX's ProcessCameraProvider
+    implementation(libs.guava)
+
+    // Vico — Compose-native charts (Material 3 module) used in ReportCharts
+    implementation(libs.vico.compose.m3)
+
+    // Plus Jakarta Sans via downloadable Google Fonts at runtime
+    implementation(libs.androidx.compose.ui.text.google.fonts)
 
     // Coil - Image Loading for Compose
     implementation(libs.coil.compose)

@@ -64,6 +64,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.khalid.vyntra.domain.model.Invoice
@@ -90,6 +92,15 @@ fun DashboardScreen(
 
     val todayFormatted = remember {
         SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.getDefault()).format(Date())
+    }
+
+    // Refresh the imperative pieces (today/monthly totals + product count
+    // + outstanding) every time the screen comes back to the foreground.
+    // Without this the dashboard keeps showing stale numbers after the user
+    // creates a sale on NewSale and pops back — the VM cache lives across
+    // the navigation so init {} doesn't re-run.
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+        viewModel.refresh()
     }
 
     Scaffold(
@@ -155,6 +166,7 @@ fun DashboardScreen(
                     ) { invoice ->
                         RecentInvoiceItem(
                             invoice = invoice,
+                            currencySymbol = uiState.currencySymbol,
                             onClick = {
                                 navController.navigate(
                                     Screen.InvoiceDetail.createRoute(invoice.id)
@@ -252,14 +264,22 @@ private fun DashboardTopBar(
 
 // ── Stat Cards ──────────────────────────────────────────────────────────────
 
+/**
+ * Formats a money value using the user-chosen [currencySymbol] from settings.
+ * We avoid `NumberFormat.getCurrencyInstance(Locale.getDefault())` because it
+ * forces a locale-derived symbol ($ on most devices), ignoring the user's
+ * pick in Settings → Display → Currency.
+ */
+private fun formatMoney(amount: Double, currencySymbol: String): String {
+    val number = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+        maximumFractionDigits = 0
+    }.format(amount)
+    return "$currencySymbol $number"
+}
+
 @Composable
 private fun StatCardsRow(uiState: DashboardUiState) {
-    val currencyFormatter = remember {
-        NumberFormat.getCurrencyInstance(Locale.getDefault()).apply {
-            maximumFractionDigits = 0
-        }
-    }
-
+    val symbol = uiState.currencySymbol
     LazyRow(
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -267,7 +287,7 @@ private fun StatCardsRow(uiState: DashboardUiState) {
         item {
             StatCard(
                 title = "Today's Sales",
-                value = currencyFormatter.format(uiState.todaySales),
+                value = formatMoney(uiState.todaySales, symbol),
                 icon = Icons.Filled.PointOfSale,
                 gradientColors = listOf(
                     Color(0xFF1565C0),
@@ -278,7 +298,7 @@ private fun StatCardsRow(uiState: DashboardUiState) {
         item {
             StatCard(
                 title = "Monthly Sales",
-                value = currencyFormatter.format(uiState.monthlySales),
+                value = formatMoney(uiState.monthlySales, symbol),
                 icon = Icons.Filled.TrendingUp,
                 gradientColors = listOf(
                     Color(0xFF00897B),
@@ -312,7 +332,7 @@ private fun StatCardsRow(uiState: DashboardUiState) {
         item {
             StatCard(
                 title = "Outstanding",
-                value = currencyFormatter.format(uiState.totalOutstanding),
+                value = formatMoney(uiState.totalOutstanding, symbol),
                 icon = Icons.Filled.AttachMoney,
                 gradientColors = if (uiState.totalOutstanding > 0) {
                     listOf(Color(0xFFC62828), Color(0xFFE53935))
@@ -510,11 +530,9 @@ private fun SectionHeader(
 @Composable
 private fun RecentInvoiceItem(
     invoice: Invoice,
+    currencySymbol: String,
     onClick: () -> Unit
 ) {
-    val currencyFormatter = remember {
-        NumberFormat.getCurrencyInstance(Locale.getDefault())
-    }
     val dateFormatter = remember {
         SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault())
     }
@@ -595,7 +613,7 @@ private fun RecentInvoiceItem(
 
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = currencyFormatter.format(invoice.totalAmount),
+                    text = formatMoney(invoice.totalAmount, currencySymbol),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface

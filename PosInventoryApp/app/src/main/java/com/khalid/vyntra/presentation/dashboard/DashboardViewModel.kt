@@ -2,6 +2,7 @@ package com.khalid.vyntra.presentation.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.khalid.vyntra.data.preferences.PreferencesManager
 import com.khalid.vyntra.domain.model.Invoice
 import com.khalid.vyntra.domain.model.Product
 import com.khalid.vyntra.domain.repository.CustomerRepository
@@ -25,6 +26,13 @@ data class DashboardUiState(
     val totalOutstanding: Double = 0.0,
     val recentInvoices: List<Invoice> = emptyList(),
     val lowStockProducts: List<Product> = emptyList(),
+    /**
+     * Currency symbol chosen by the user in Settings → Display.
+     * Used by the screen to format money instead of the locale-derived
+     * default (which would render "$" for many devices regardless of
+     * the user's preference).
+     */
+    val currencySymbol: String = "Rs",
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -33,7 +41,8 @@ data class DashboardUiState(
 class DashboardViewModel @Inject constructor(
     private val invoiceRepository: InvoiceRepository,
     private val productRepository: ProductRepository,
-    private val customerRepository: CustomerRepository
+    private val customerRepository: CustomerRepository,
+    private val preferencesManager: PreferencesManager
 ) : ViewModel() {
 
     private val _salesData = MutableStateFlow(Pair(0.0, 0.0)) // today, monthly
@@ -41,12 +50,17 @@ class DashboardViewModel @Inject constructor(
     private val _totalOutstanding = MutableStateFlow(0.0)
 
     val uiState: StateFlow<DashboardUiState> = combine(
-        _salesData,
-        productRepository.getLowStockProducts(),
-        invoiceRepository.getAll(),
-        _totalProducts,
-        _totalOutstanding
-    ) { salesData, lowStock, allInvoices, productCount, outstanding ->
+        combine(
+            _salesData,
+            productRepository.getLowStockProducts(),
+            invoiceRepository.getAll()
+        ) { sales, low, inv -> Triple(sales, low, inv) },
+        combine(
+            _totalProducts,
+            _totalOutstanding,
+            preferencesManager.currencySymbol
+        ) { products, out, sym -> Triple(products, out, sym) }
+    ) { (salesData, lowStock, allInvoices), (productCount, outstanding, currencySymbol) ->
         DashboardUiState(
             todaySales = salesData.first,
             monthlySales = salesData.second,
@@ -55,6 +69,7 @@ class DashboardViewModel @Inject constructor(
             totalOutstanding = outstanding,
             recentInvoices = allInvoices.take(5),
             lowStockProducts = lowStock.take(10),
+            currencySymbol = currencySymbol,
             isLoading = false
         )
     }.stateIn(

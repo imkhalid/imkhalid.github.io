@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        Monochrome variant for Android 13+ themed icons. Single-color
+        silhouette of the receipt + checkmark; the system re-tints it
+        with the user's themed-icon color.
+    -->
+
+    <!-- Receipt body (top) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 36,28
+                          h 36
+                          a 4,4 0 0 1 4,4
+                          v 38
+                          h -44
+                          v -38
+                          a 4,4 0 0 1 4,-4 z" />
+
+    <!-- Serrated bottom edge -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 32,70
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5 z" />
+
+    <!-- Checkmark medallion outline -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 70,68 m -16,0 a 16,16 0 1,0 32,0 a 16,16 0 1,0 -32,0 z" />
+</vector>

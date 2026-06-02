@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -141,6 +142,7 @@ fun NewPurchaseScreen(
                 if (uiState.items.isEmpty()) {
                     item {
                         EmptyStateView(
+                            icon = Icons.Default.Inventory2,
                             title = "No Items",
                             message = "Search and add products to this purchase"
                         )

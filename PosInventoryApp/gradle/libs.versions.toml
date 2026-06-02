@@ -43,6 +43,15 @@ mlkitBarcode = "17.3.0"
 # CameraX
 cameraX = "1.4.1"
 
+# Guava (provides ListenableFuture for CameraX in Kotlin sources)
+guava = "33.4.0-android"
+
+# Vico — Compose-native charts (used by ReportCharts.kt)
+vico = "2.1.3"
+
+# Downloadable Google Fonts at runtime (Plus Jakarta Sans in Type.kt)
+composeFonts = "1.7.6"
+
 # Coil
 coil = "3.0.4"
 
@@ -123,6 +132,15 @@ androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", 
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
 androidx-camera-mlkit-vision = { group = "androidx.camera", name = "camera-mlkit-vision", version.ref = "cameraX" }
+
+# Guava (exposes ListenableFuture for CameraX in Kotlin sources)
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+
+# Vico — Compose-native charting
+vico-compose-m3 = { group = "com.patrykandpatrick.vico", name = "compose-m3", version.ref = "vico" }
+
+# Downloadable Google Fonts at runtime
+androidx-compose-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "composeFonts" }
 
 # Coil
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
