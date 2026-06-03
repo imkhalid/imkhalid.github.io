@@ -25,7 +25,15 @@ import com.khalid.vyntra.presentation.reports.GeneralReportScreen
 import com.khalid.vyntra.presentation.reports.ReportType
 import com.khalid.vyntra.presentation.reports.ReportsScreen
 import com.khalid.vyntra.presentation.reports.SalesReportScreen
+import com.khalid.vyntra.presentation.csv.CsvExportScreen
+import com.khalid.vyntra.presentation.csv.CsvImportScreen
+import com.khalid.vyntra.presentation.premium.PremiumScreen
 import com.khalid.vyntra.presentation.scanner.BarcodeScannerScreen
+import com.khalid.vyntra.presentation.settings.AboutScreen
+import com.khalid.vyntra.presentation.settings.BusinessProfileScreen
+import com.khalid.vyntra.presentation.settings.DataScreen
+import com.khalid.vyntra.presentation.settings.DisplaySettingsScreen
+import com.khalid.vyntra.presentation.settings.InvoiceSettingsScreen
 import com.khalid.vyntra.presentation.settings.SettingsScreen
 import com.khalid.vyntra.presentation.stock.StockAdjustmentScreen
 import com.khalid.vyntra.presentation.vendor.AddEditVendorScreen
@@ -271,9 +279,41 @@ fun VyntraNavGraph(
             )
         }
 
-        // Settings
+        // Settings hub + sub-screens.
         composable(route = Screen.Settings.route) {
             SettingsScreen(navController = navController)
+        }
+        composable(route = Screen.SettingsBusinessProfile.route) {
+            BusinessProfileScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(route = Screen.SettingsInvoice.route) {
+            InvoiceSettingsScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(route = Screen.SettingsDisplay.route) {
+            DisplaySettingsScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(route = Screen.SettingsData.route) {
+            DataScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToExport = { navController.navigate(Screen.CsvExport.route) },
+                onNavigateToImport = { navController.navigate(Screen.CsvImport.route) }
+            )
+        }
+        composable(route = Screen.SettingsAbout.route) {
+            AboutScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        // Premium upgrade
+        composable(route = Screen.Premium.route) {
+            PremiumScreen(onNavigateBack = { navController.popBackStack() })
+        }
+
+        // CSV import/export
+        composable(route = Screen.CsvExport.route) {
+            CsvExportScreen(onNavigateBack = { navController.popBackStack() })
+        }
+        composable(route = Screen.CsvImport.route) {
+            CsvImportScreen(onNavigateBack = { navController.popBackStack() })
         }
 
         // Barcode Scanner

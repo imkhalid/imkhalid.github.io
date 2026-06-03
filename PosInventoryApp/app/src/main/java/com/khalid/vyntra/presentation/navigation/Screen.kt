@@ -86,6 +86,14 @@ sealed class Screen(val route: String) {
 
     // ── Settings ────────────────────────────────────────────────────────
     data object Settings : Screen("settings")
+    data object SettingsBusinessProfile : Screen("settings/business")
+    data object SettingsInvoice : Screen("settings/invoice")
+    data object SettingsDisplay : Screen("settings/display")
+    data object SettingsData : Screen("settings/data")
+    data object SettingsAbout : Screen("settings/about")
+
+    // ── Premium subscription upgrade ────────────────────────────────────
+    data object Premium : Screen("premium")
 
     // ── Barcode Scanner ─────────────────────────────────────────────────
     data object BarcodeScanner : Screen("barcode_scanner")
