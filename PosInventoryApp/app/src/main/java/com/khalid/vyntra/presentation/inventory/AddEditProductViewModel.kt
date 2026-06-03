@@ -166,6 +166,48 @@ class AddEditProductViewModel @Inject constructor(
         _uiState.update { it.copy(notes = value) }
     }
 
+    /**
+     * Quick-add a new category from inside the product form and auto-select
+     * it. Triggered by the "+ Add new category" row at the top of the
+     * Category dropdown.
+     */
+    fun createCategoryQuick(name: String) {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return
+        viewModelScope.launch {
+            try {
+                val newId = categoryRepository.add(Category(name = trimmed))
+                // Optimistic select; the categories Flow refreshes the list.
+                _uiState.update { it.copy(categoryId = newId) }
+            } catch (e: Exception) {
+                _event.send(AddEditProductEvent.ShowError(e.message ?: "Failed to add category"))
+            }
+        }
+    }
+
+    /**
+     * Quick-add a new vendor from inside the product form and auto-select it.
+     * Triggered by the "+ Add new vendor" row at the top of the Vendor dropdown.
+     */
+    fun createVendorQuick(name: String, phone: String?) {
+        val trimmed = name.trim()
+        if (trimmed.isEmpty()) return
+        viewModelScope.launch {
+            try {
+                val newId = vendorRepository.add(
+                    Vendor(
+                        name = trimmed,
+                        company = null,
+                        phone = phone?.trim()?.ifBlank { null }
+                    )
+                )
+                _uiState.update { it.copy(supplierId = newId) }
+            } catch (e: Exception) {
+                _event.send(AddEditProductEvent.ShowError(e.message ?: "Failed to add vendor"))
+            }
+        }
+    }
+
     fun save() {
         val state = _uiState.value
         val errors = validate(state)
