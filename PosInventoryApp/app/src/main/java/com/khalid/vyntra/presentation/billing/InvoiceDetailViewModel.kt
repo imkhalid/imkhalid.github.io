@@ -3,6 +3,7 @@ package com.khalid.vyntra.presentation.billing
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.khalid.vyntra.data.preferences.PreferencesManager
 import com.khalid.vyntra.domain.model.AdjustmentType
 import com.khalid.vyntra.domain.model.Invoice
 import com.khalid.vyntra.domain.model.InvoiceStatus
@@ -16,13 +17,27 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Snapshot of the business profile needed by the PDF header. Cached
+ * alongside the invoice so the Share / Print buttons don't have to
+ * round-trip DataStore on each tap.
+ */
+data class BusinessProfileSnapshot(
+    val name: String = "",
+    val address: String = "",
+    val taxNumber: String = "",
+    val currencySymbol: String = "Rs"
+)
+
 data class InvoiceDetailUiState(
     val invoice: Invoice? = null,
+    val business: BusinessProfileSnapshot = BusinessProfileSnapshot(),
     val isLoading: Boolean = true,
     val isCancelling: Boolean = false
 )
@@ -38,6 +53,7 @@ class InvoiceDetailViewModel @Inject constructor(
     private val productRepository: ProductRepository,
     private val customerRepository: CustomerRepository,
     private val stockAdjustmentRepository: StockAdjustmentRepository,
+    private val preferencesManager: PreferencesManager,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -51,6 +67,31 @@ class InvoiceDetailViewModel @Inject constructor(
 
     init {
         loadInvoice()
+        loadBusinessProfile()
+    }
+
+    /**
+     * One-shot read of the business profile. Reload on demand is unnecessary
+     * — the profile rarely changes and we just need a snapshot when the
+     * user taps Share / Print.
+     */
+    private fun loadBusinessProfile() {
+        viewModelScope.launch {
+            try {
+                _uiState.update {
+                    it.copy(
+                        business = BusinessProfileSnapshot(
+                            name = preferencesManager.businessName.first(),
+                            address = preferencesManager.businessAddress.first(),
+                            taxNumber = preferencesManager.taxNumber.first(),
+                            currencySymbol = preferencesManager.currencySymbol.first()
+                        )
+                    )
+                }
+            } catch (_: Exception) {
+                // PDF header will fall back to generic labels.
+            }
+        }
     }
 
     private fun loadInvoice() {

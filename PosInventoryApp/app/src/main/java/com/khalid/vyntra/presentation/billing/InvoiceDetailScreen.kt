@@ -53,6 +53,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.khalid.vyntra.domain.model.Invoice
+import androidx.compose.material.icons.filled.Print
+import kotlinx.coroutines.launch
 import com.khalid.vyntra.domain.model.InvoiceItem
 import com.khalid.vyntra.domain.model.InvoiceStatus
 import com.khalid.vyntra.presentation.components.ConfirmDialog
@@ -71,7 +73,51 @@ fun InvoiceDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var showCancelDialog by rememberSaveable { mutableStateOf(false) }
+
+    /**
+     * Build the PDF and launch the system share chooser (WhatsApp, Gmail,
+     * Telegram, Drive, …). PDF generation happens off the main thread inside
+     * the helper; a snackbar surfaces failures.
+     */
+    fun runShare() {
+        val invoice = uiState.invoice ?: return
+        val biz = uiState.business
+        val ok = com.khalid.vyntra.util.InvoiceShareHelper.shareInvoice(
+            context = context,
+            invoice = invoice,
+            businessName = biz.name,
+            businessAddress = biz.address,
+            taxNumber = biz.taxNumber,
+            currencySymbol = biz.currencySymbol
+        )
+        if (!ok) {
+            scope.launch { snackbarHostState.showSnackbar("Couldn't build the PDF — try again.") }
+        }
+    }
+
+    /**
+     * Submit the PDF to the Android print spooler — routes to Wi-Fi /
+     * Bluetooth / cloud printers via whichever OEM print services are
+     * installed.
+     */
+    fun runPrint() {
+        val invoice = uiState.invoice ?: return
+        val biz = uiState.business
+        val ok = com.khalid.vyntra.util.InvoiceShareHelper.printInvoice(
+            context = context,
+            invoice = invoice,
+            businessName = biz.name,
+            businessAddress = biz.address,
+            taxNumber = biz.taxNumber,
+            currencySymbol = biz.currencySymbol
+        )
+        if (!ok) {
+            scope.launch { snackbarHostState.showSnackbar("Printing isn't available on this device.") }
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.event.collect { event ->
@@ -203,7 +249,8 @@ fun InvoiceDetailScreen(
                             ActionButtons(
                                 isCancelling = uiState.isCancelling,
                                 onCancel = { showCancelDialog = true },
-                                onSharePdf = { /* TODO: Share PDF */ }
+                                onSharePdf = ::runShare,
+                                onPrintPdf = ::runPrint
                             )
                         }
                     }
@@ -485,25 +532,45 @@ private fun PaymentInfoCard(invoice: Invoice) {
 private fun ActionButtons(
     isCancelling: Boolean,
     onCancel: () -> Unit,
-    onSharePdf: () -> Unit
+    onSharePdf: () -> Unit,
+    onPrintPdf: () -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Share PDF
-        OutlinedButton(
-            onClick = onSharePdf,
+        // Share + Print are the two primary affordances. Pair them in a row
+        // so neither dominates the other.
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Share PDF")
+            OutlinedButton(
+                onClick = onSharePdf,
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Share")
+            }
+            OutlinedButton(
+                onClick = onPrintPdf,
+                modifier = Modifier.weight(1f),
+                shape = MaterialTheme.shapes.medium
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Print,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Print")
+            }
         }
 
         // Cancel invoice
