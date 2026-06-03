@@ -331,6 +331,21 @@ private fun ProfitLossContent(
                 subtitle = if (netProfit >= 0) "Your business is profitable" else "Expenses exceed income"
             )
         }
+
+        // Comparison chart — only meaningful once at least one figure is non-zero.
+        if (data != null && (data.totalSales != 0.0 || data.totalPurchases != 0.0 || data.totalTax != 0.0)) {
+            item {
+                com.khalid.vyntra.presentation.components.ComparisonBarChart(
+                    title = "Breakdown",
+                    bars = listOf(
+                        "Income" to data.totalSales,
+                        "Expenses" to data.totalPurchases,
+                        "Tax" to data.totalTax,
+                        "Net" to data.netProfit
+                    )
+                )
+            }
+        }
     }
 }
 
@@ -774,6 +789,21 @@ private fun TopSellingContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
             )
+        }
+
+        if (products.isNotEmpty()) {
+            item {
+                // Top-5 bar chart — names truncated so axis labels stay
+                // readable on narrow screens.
+                val chartBars = products.take(5).map { (name, qty) ->
+                    val short = if (name.length > 10) name.take(10) + "…" else name
+                    short to qty.toDouble()
+                }
+                com.khalid.vyntra.presentation.components.ComparisonBarChart(
+                    title = "Top 5 — units sold",
+                    bars = chartBars
+                )
+            }
         }
 
         item {

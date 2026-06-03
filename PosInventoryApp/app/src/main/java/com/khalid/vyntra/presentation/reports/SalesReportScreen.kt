@@ -238,6 +238,23 @@ fun SalesReportScreen(
                     }
                 }
 
+                // Daily sales trend chart — grouped by formatted date so days
+                // with no sales drop out naturally (sparser X-axis).
+                val invoices = uiState.salesData?.invoices ?: emptyList()
+                if (invoices.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        val byDay = invoices
+                            .groupBy { it.createdAt.toFormattedDate() }
+                            .toSortedMap()
+                        com.khalid.vyntra.presentation.components.TrendLineChart(
+                            title = "Daily Sales",
+                            values = byDay.values.map { day -> day.sumOf { it.totalAmount } },
+                            xLabels = byDay.keys.toList()
+                        )
+                    }
+                }
+
                 // Sales list header
                 item {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -248,8 +265,6 @@ fun SalesReportScreen(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                     )
                 }
-
-                val invoices = uiState.salesData?.invoices ?: emptyList()
 
                 if (invoices.isEmpty()) {
                     item {
