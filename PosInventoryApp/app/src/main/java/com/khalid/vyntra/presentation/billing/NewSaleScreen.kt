@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -129,46 +130,69 @@ fun NewSaleScreen(
                 )
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = {
+            // Sticky CTA — always reachable, even when the IME is up. Total
+            // is folded into the label so the user can confirm what they're
+            // about to charge without scrolling down to the summary.
+            com.khalid.vyntra.presentation.components.VyntraBottomActionBar(
+                label = if (uiState.cartItems.isEmpty())
+                    "Add items to continue"
+                else
+                    "Complete Sale  ·  ${uiState.total.toCurrency(uiState.currencySymbol)}",
+                onClick = viewModel::completeSale,
+                enabled = !uiState.isProcessing && uiState.cartItems.isNotEmpty(),
+                loading = uiState.isProcessing
+            )
+        }
     ) { innerPadding ->
-        Column(
+        // Single scrollable LazyColumn instead of Column+weight+nested
+        // LazyColumn. Old layout crushed the cart to zero height when the
+        // inline SaleBottomSection got tall (IME open / many fields). Now
+        // everything — customer banner, search, results, cart items,
+        // summary + payment — scrolls together.
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .imePadding(),
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            // Customer selection indicator
             if (uiState.selectedCustomer != null) {
-                CustomerBanner(
-                    customer = uiState.selectedCustomer!!,
-                    onClear = { viewModel.selectCustomer(null) }
+                item(key = "customer_banner") {
+                    CustomerBanner(
+                        customer = uiState.selectedCustomer!!,
+                        onClear = { viewModel.selectCustomer(null) }
+                    )
+                }
+            }
+
+            item(key = "search_bar") {
+                ProductSearchBar(
+                    query = uiState.searchQuery,
+                    onQueryChange = viewModel::onSearchQueryChanged,
+                    onBarcodeScan = { navController.navigate(Screen.BarcodeScanner.route) }
                 )
             }
 
-            // Search bar with barcode button
-            ProductSearchBar(
-                query = uiState.searchQuery,
-                onQueryChange = viewModel::onSearchQueryChanged,
-                onBarcodeScan = { navController.navigate(Screen.BarcodeScanner.route) }
-            )
-
-            // Search results dropdown
-            AnimatedVisibility(visible = uiState.searchResults.isNotEmpty()) {
-                SearchResultsDropdown(
-                    results = uiState.searchResults,
-                    currencySymbol = uiState.currencySymbol,
-                    onProductSelected = viewModel::addProductToCart
-                )
+            if (uiState.searchResults.isNotEmpty()) {
+                item(key = "search_results") {
+                    SearchResultsDropdown(
+                        results = uiState.searchResults,
+                        currencySymbol = uiState.currencySymbol,
+                        onProductSelected = viewModel::addProductToCart
+                    )
+                }
             }
 
-            // Cart list and bottom section
             if (uiState.cartItems.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                item(key = "cart_empty") {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 48.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Icon(
                             imageVector = Icons.Default.ShoppingCart,
                             contentDescription = null,
@@ -189,16 +213,8 @@ fun NewSaleScreen(
                     }
                 }
             } else {
-                // Cart items
-                LazyColumn(
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(
-                        items = uiState.cartItems,
-                        key = { it.product.id }
-                    ) { cartItem ->
+                items(items = uiState.cartItems, key = { "cart_${it.product.id}" }) { cartItem ->
+                    Box(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
                         CartItemCard(
                             cartItem = cartItem,
                             currencySymbol = uiState.currencySymbol,
@@ -214,14 +230,18 @@ fun NewSaleScreen(
                 }
             }
 
-            // Sticky bottom section
-            SaleBottomSection(
-                uiState = uiState,
-                onDiscountChange = viewModel::applyDiscount,
-                onPaymentMethodChange = viewModel::setPaymentMethod,
-                onPaidAmountChange = viewModel::setPaidAmount,
-                onCompleteSale = viewModel::completeSale
-            )
+            // Sale summary + payment input — last item in the scroll so the
+            // user can always scroll to see / edit the cash field. The
+            // Complete Sale button lives in the Scaffold's bottomBar above.
+            item(key = "sale_bottom") {
+                SaleBottomSection(
+                    uiState = uiState,
+                    onDiscountChange = viewModel::applyDiscount,
+                    onPaymentMethodChange = viewModel::setPaymentMethod,
+                    onPaidAmountChange = viewModel::setPaidAmount,
+                    onCompleteSale = viewModel::completeSale
+                )
+            }
         }
     }
 }
@@ -691,35 +711,11 @@ private fun SaleBottomSection(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
             }
-
-            // Complete sale button
-            Button(
-                onClick = onCompleteSale,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                enabled = !uiState.isProcessing && uiState.cartItems.isNotEmpty(),
-                shape = MaterialTheme.shapes.medium,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                if (uiState.isProcessing) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text(
-                        text = "Complete Sale",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
+            // Complete Sale button moved to the Scaffold's bottomBar so it
+            // stays visible regardless of how tall the inline summary +
+            // payment fields get (especially when the IME is open).
         }
     }
 }
