@@ -1,68 +1,57 @@
 package com.khalid.vyntra.presentation.dashboard
 
-import androidx.compose.animation.animateContentSize
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.TrendingDown
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Inventory
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PointOfSale
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -70,17 +59,33 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.khalid.vyntra.domain.model.Invoice
 import com.khalid.vyntra.domain.model.InvoiceStatus
-import com.khalid.vyntra.domain.model.Product
+import com.khalid.vyntra.presentation.components.Sparkline
 import com.khalid.vyntra.presentation.navigation.Screen
+import com.khalid.vyntra.presentation.theme.LossRed
 import com.khalid.vyntra.presentation.theme.ProfitGreen
 import com.khalid.vyntra.presentation.theme.StockCritical
 import com.khalid.vyntra.presentation.theme.StockLow
-import com.khalid.vyntra.presentation.theme.StatCardShape
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.math.abs
 
+/**
+ * Dashboard — the landing screen.
+ *
+ * Layout (top → bottom):
+ *  1. Greeting row: business-name eyebrow (when set), time-aware greeting,
+ *     weekday + date. Settings icon inline on the right (no TopAppBar).
+ *  2. Low-stock banner (only when count > 0).
+ *  3. Hero revenue card: today's total + day-over-day delta chip +
+ *     7-day sparkline.
+ *  4. Secondary KPIs (2×2): transactions, avg sale, outstanding, products.
+ *  5. Primary CTA: "New Sale" card.
+ *  6. Three secondary actions: Add product, Scan, Purchase.
+ *  7. Recent transactions list.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
@@ -88,391 +93,464 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
-
+    val greeting = remember { greetingForNow() }
     val todayFormatted = remember {
-        SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.getDefault()).format(Date())
+        SimpleDateFormat("EEEE, d MMM", Locale.getDefault()).format(Date())
     }
 
-    // Refresh the imperative pieces (today/monthly totals + product count
-    // + outstanding) every time the screen comes back to the foreground.
-    // Without this the dashboard keeps showing stale numbers after the user
-    // creates a sale on NewSale and pops back — the VM cache lives across
-    // the navigation so init {} doesn't re-run.
+    // Refresh on every resume. Without this the cached VM keeps showing
+    // stale totals after the user creates a sale on NewSale and pops back —
+    // init {} doesn't re-run because SharingStarted.WhileSubscribed keeps
+    // the flow alive across the navigation.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         viewModel.refresh()
     }
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            DashboardTopBar(
-                scrollBehavior = scrollBehavior,
-                todayFormatted = todayFormatted,
+    // Pull the status-bar inset directly. We don't wrap in a Scaffold (no
+    // TopAppBar) so the LazyColumn pads itself.
+    val topInset = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(top = topInset + 8.dp, bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item {
+            GreetingHeader(
+                businessName = uiState.businessName,
+                greeting = greeting,
+                dateLabel = todayFormatted,
                 onSettingsClick = { navController.navigate(Screen.Settings.route) }
             )
         }
-    ) { innerPadding ->
-        if (uiState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+
+        if (uiState.lowStockCount > 0) {
+            item {
+                LowStockBanner(
+                    count = uiState.lowStockCount,
+                    onClick = { navController.navigate(Screen.LowStockReport.route) }
+                )
             }
+        }
+
+        item {
+            HeroRevenueCard(
+                todaySales = uiState.todaySales,
+                deltaPercent = uiState.todayDeltaPercent,
+                sparkline = uiState.last7DaysSales,
+                currencySymbol = uiState.currencySymbol,
+                onClick = { navController.navigate(Screen.SalesReport.route) }
+            )
+        }
+
+        item {
+            KpiPair(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                left = "Transactions" to uiState.todayTransactionCount.toString(),
+                right = "Avg sale" to formatMoney(uiState.todayAverageSale, uiState.currencySymbol)
+            )
+        }
+        item {
+            KpiPair(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                left = "Outstanding" to formatMoney(uiState.totalOutstanding, uiState.currencySymbol),
+                leftTint = if (uiState.totalOutstanding > 0) LossRed else null,
+                right = "Products" to uiState.totalProducts.toString()
+            )
+        }
+
+        item {
+            QuickActionsRow(
+                onNewSale = { navController.navigate(Screen.NewSale.route) },
+                onAddProduct = { navController.navigate(Screen.AddEditProduct.createRoute()) },
+                onScan = { navController.navigate(Screen.BarcodeScanner.route) },
+                onPurchase = { navController.navigate(Screen.NewPurchase.route) }
+            )
+        }
+
+        item {
+            SectionHeader(
+                title = "Recent transactions",
+                actionLabel = "View all",
+                onActionClick = { navController.navigate(Screen.InvoiceHistory.route) }
+            )
+        }
+        if (uiState.recentInvoices.isEmpty()) {
+            item { EmptyStateRow(message = "No transactions yet — start a sale.") }
         } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(bottom = 24.dp)
-            ) {
-                // Stat Cards - Horizontal Scrollable Row
-                item {
-                    StatCardsRow(uiState = uiState)
-                }
-
-                // Quick Actions
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    QuickActionsSection(navController = navController)
-                }
-
-                // Recent Transactions Header
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SectionHeader(
-                        title = "Recent Transactions",
-                        icon = Icons.Filled.Receipt,
-                        actionText = "View All",
-                        onActionClick = { navController.navigate(Screen.InvoiceHistory.route) }
-                    )
-                }
-
-                // Recent Transactions List
-                if (uiState.recentInvoices.isEmpty()) {
-                    item {
-                        EmptyStateCard(
-                            message = "No transactions yet. Create your first sale!",
-                            icon = Icons.Filled.PointOfSale
-                        )
+            items(items = uiState.recentInvoices, key = { it.id }) { invoice ->
+                RecentInvoiceRow(
+                    invoice = invoice,
+                    currencySymbol = uiState.currencySymbol,
+                    onClick = {
+                        navController.navigate(Screen.InvoiceDetail.createRoute(invoice.id))
                     }
-                } else {
-                    items(
-                        items = uiState.recentInvoices,
-                        key = { it.id }
-                    ) { invoice ->
-                        RecentInvoiceItem(
-                            invoice = invoice,
-                            currencySymbol = uiState.currencySymbol,
-                            onClick = {
-                                navController.navigate(
-                                    Screen.InvoiceDetail.createRoute(invoice.id)
-                                )
-                            }
-                        )
-                    }
-                }
-
-                // Low Stock Alerts Header
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    SectionHeader(
-                        title = "Low Stock Alerts",
-                        icon = Icons.Filled.Warning,
-                        iconTint = StockLow,
-                        actionText = if (uiState.lowStockProducts.isNotEmpty()) "View All" else null,
-                        onActionClick = { navController.navigate(Screen.LowStockReport.route) }
-                    )
-                }
-
-                // Low Stock Products
-                if (uiState.lowStockProducts.isEmpty()) {
-                    item {
-                        EmptyStateCard(
-                            message = "All products are well stocked.",
-                            icon = Icons.Outlined.Inventory2
-                        )
-                    }
-                } else {
-                    items(
-                        items = uiState.lowStockProducts,
-                        key = { it.id }
-                    ) { product ->
-                        LowStockItem(
-                            product = product,
-                            onClick = {
-                                navController.navigate(
-                                    Screen.AddEditProduct.createRoute(product.id)
-                                )
-                            }
-                        )
-                    }
-                }
-
-                item { Spacer(modifier = Modifier.height(16.dp)) }
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+// ── Greeting ────────────────────────────────────────────────────────────────
+
 @Composable
-private fun DashboardTopBar(
-    scrollBehavior: TopAppBarScrollBehavior,
-    todayFormatted: String,
+private fun GreetingHeader(
+    businessName: String,
+    greeting: String,
+    dateLabel: String,
     onSettingsClick: () -> Unit
 ) {
-    LargeTopAppBar(
-        title = {
-            Column {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            // Eyebrow only when a real business name is set — never falls
+            // back to the brand name "Vyntra" since that's a redundant
+            // header on the user's own dashboard.
+            if (businessName.isNotBlank()) {
                 Text(
-                    text = "Vyntra",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold
+                    text = businessName,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
                 )
+                Spacer(Modifier.height(2.dp))
+            }
+            Text(
+                text = greeting,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                text = dateLabel,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        IconButton(onClick = onSettingsClick) {
+            Icon(
+                imageVector = Icons.Filled.Settings,
+                contentDescription = "Settings",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+// ── Low stock banner ────────────────────────────────────────────────────────
+
+@Composable
+private fun LowStockBanner(count: Int, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
+        color = StockLow.copy(alpha = 0.12f)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Filled.NotificationsActive,
+                contentDescription = null,
+                tint = StockLow,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(
+                text = "$count ${if (count == 1) "product" else "products"} low on stock",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = "Review",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(Modifier.width(4.dp))
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+// ── Hero KPI card ───────────────────────────────────────────────────────────
+
+@Composable
+private fun HeroRevenueCard(
+    todaySales: Double,
+    deltaPercent: Double?,
+    sparkline: List<Double>,
+    currencySymbol: String,
+    onClick: () -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "TODAY'S REVENUE",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.height(8.dp))
+
+            Row(verticalAlignment = Alignment.Bottom) {
                 Text(
-                    text = todayFormatted,
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = formatMoney(todaySales, currencySymbol),
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (deltaPercent != null) {
+                    Spacer(Modifier.width(10.dp))
+                    DeltaChip(deltaPercent, modifier = Modifier.padding(bottom = 8.dp))
+                }
+            }
+
+            if (sparkline.size >= 2) {
+                Spacer(Modifier.height(14.dp))
+                Sparkline(
+                    values = sparkline,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(60.dp),
+                    lineColor = MaterialTheme.colorScheme.primary,
+                    fillColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)
+                )
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "Last 7 days",
+                    style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        },
-        actions = {
-            IconButton(onClick = { /* Notifications */ }) {
-                Icon(
-                    Icons.Filled.Notifications,
-                    contentDescription = "Notifications"
-                )
-            }
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    Icons.Filled.Settings,
-                    contentDescription = "Settings"
-                )
-            }
-        },
-        scrollBehavior = scrollBehavior,
-        colors = TopAppBarDefaults.largeTopAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
-    )
-}
-
-// ── Stat Cards ──────────────────────────────────────────────────────────────
-
-/**
- * Formats a money value using the user-chosen [currencySymbol] from settings.
- * We avoid `NumberFormat.getCurrencyInstance(Locale.getDefault())` because it
- * forces a locale-derived symbol ($ on most devices), ignoring the user's
- * pick in Settings → Display → Currency.
- */
-private fun formatMoney(amount: Double, currencySymbol: String): String {
-    val number = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
-        maximumFractionDigits = 0
-    }.format(amount)
-    return "$currencySymbol $number"
+        }
+    }
 }
 
 @Composable
-private fun StatCardsRow(uiState: DashboardUiState) {
-    val symbol = uiState.currencySymbol
-    LazyRow(
-        contentPadding = PaddingValues(horizontal = 16.dp),
+private fun DeltaChip(deltaPercent: Double, modifier: Modifier = Modifier) {
+    val up = deltaPercent >= 0
+    val color = if (up) ProfitGreen else LossRed
+    Surface(
+        modifier = modifier,
+        shape = CircleShape,
+        color = color.copy(alpha = 0.14f)
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (up) Icons.AutoMirrored.Filled.TrendingUp
+                              else Icons.AutoMirrored.Filled.TrendingDown,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(Modifier.width(4.dp))
+            Text(
+                text = "${if (up) "+" else "-"}${String.format(Locale.getDefault(), "%.1f", abs(deltaPercent))}%",
+                style = MaterialTheme.typography.labelMedium,
+                color = color,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+// ── KPI row (two side-by-side metric chips) ─────────────────────────────────
+
+@Composable
+private fun KpiPair(
+    left: Pair<String, String>,
+    right: Pair<String, String>,
+    modifier: Modifier = Modifier,
+    leftTint: Color? = null,
+    rightTint: Color? = null
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        item {
-            StatCard(
-                title = "Today's Sales",
-                value = formatMoney(uiState.todaySales, symbol),
-                icon = Icons.Filled.PointOfSale,
-                gradientColors = listOf(
-                    Color(0xFF1565C0),
-                    Color(0xFF1E88E5)
-                )
-            )
-        }
-        item {
-            StatCard(
-                title = "Monthly Sales",
-                value = formatMoney(uiState.monthlySales, symbol),
-                icon = Icons.Filled.TrendingUp,
-                gradientColors = listOf(
-                    Color(0xFF00897B),
-                    Color(0xFF26A69A)
-                )
-            )
-        }
-        item {
-            StatCard(
-                title = "Total Products",
-                value = uiState.totalProducts.toString(),
-                icon = Icons.Filled.Inventory,
-                gradientColors = listOf(
-                    Color(0xFF5E35B1),
-                    Color(0xFF7E57C2)
-                )
-            )
-        }
-        item {
-            StatCard(
-                title = "Low Stock",
-                value = uiState.lowStockCount.toString(),
-                icon = Icons.Filled.Warning,
-                gradientColors = if (uiState.lowStockCount > 0) {
-                    listOf(Color(0xFFE65100), Color(0xFFFF8F00))
-                } else {
-                    listOf(Color(0xFF2E7D32), Color(0xFF43A047))
-                }
-            )
-        }
-        item {
-            StatCard(
-                title = "Outstanding",
-                value = formatMoney(uiState.totalOutstanding, symbol),
-                icon = Icons.Filled.AttachMoney,
-                gradientColors = if (uiState.totalOutstanding > 0) {
-                    listOf(Color(0xFFC62828), Color(0xFFE53935))
-                } else {
-                    listOf(Color(0xFF2E7D32), Color(0xFF43A047))
-                }
-            )
-        }
+        MetricChipCard(Modifier.weight(1f), left.first, left.second, leftTint)
+        MetricChipCard(Modifier.weight(1f), right.first, right.second, rightTint)
     }
 }
 
 @Composable
-private fun StatCard(
-    title: String,
+private fun MetricChipCard(
+    modifier: Modifier,
+    label: String,
     value: String,
-    icon: ImageVector,
-    gradientColors: List<Color>
+    valueTint: Color?
 ) {
     Card(
-        modifier = Modifier
-            .width(160.dp)
-            .height(120.dp),
-        shape = StatCardShape,
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        modifier = modifier,
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Box(
+        Column(modifier = Modifier.padding(14.dp)) {
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.sp
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = value,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = valueTint ?: MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+    }
+}
+
+// ── Quick actions ───────────────────────────────────────────────────────────
+
+@Composable
+private fun QuickActionsRow(
+    onNewSale: () -> Unit,
+    onAddProduct: () -> Unit,
+    onScan: () -> Unit,
+    onPurchase: () -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        // Hero CTA — the app's primary verb. Always present, always tinted.
+        ElevatedCard(
             modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    brush = Brush.linearGradient(colors = gradientColors)
-                )
-                .padding(16.dp)
+                .fillMaxWidth()
+                .clickable(onClick = onNewSale),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.elevatedCardColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            ),
+            elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.85f),
-                    modifier = Modifier.size(24.dp)
-                )
-                Column {
-                    Text(
-                        text = value,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.85f)
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.18f)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PointOfSale,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(10.dp).size(22.dp)
                     )
                 }
+                Spacer(Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "New Sale",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Start a checkout",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    )
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
             }
         }
-    }
-}
 
-// ── Quick Actions ───────────────────────────────────────────────────────────
+        Spacer(Modifier.height(10.dp))
 
-@Composable
-private fun QuickActionsSection(navController: NavController) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = "Quick Actions",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(vertical = 12.dp)
-        )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            QuickActionButton(
-                modifier = Modifier.weight(1f),
-                label = "New Sale",
-                icon = Icons.Filled.PointOfSale,
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                onClick = { navController.navigate(Screen.NewSale.route) }
-            )
-            QuickActionButton(
-                modifier = Modifier.weight(1f),
-                label = "Add Product",
-                icon = Icons.Filled.Add,
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                onClick = { navController.navigate(Screen.AddEditProduct.createRoute()) }
-            )
-            QuickActionButton(
-                modifier = Modifier.weight(1f),
-                label = "Purchase",
-                icon = Icons.Filled.ShoppingCart,
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
-                onClick = { navController.navigate(Screen.NewPurchase.route) }
-            )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            SecondaryAction(Modifier.weight(1f), "Add product", Icons.Filled.Add, onAddProduct)
+            SecondaryAction(Modifier.weight(1f), "Scan", Icons.Filled.QrCodeScanner, onScan)
+            SecondaryAction(Modifier.weight(1f), "Purchase", Icons.Filled.ShoppingCart, onPurchase)
         }
     }
 }
 
 @Composable
-private fun QuickActionButton(
-    modifier: Modifier = Modifier,
+private fun SecondaryAction(
+    modifier: Modifier,
     label: String,
     icon: ImageVector,
-    containerColor: Color,
-    contentColor: Color,
     onClick: () -> Unit
 ) {
     Card(
-        modifier = modifier
-            .height(88.dp)
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = containerColor),
-        shape = MaterialTheme.shapes.medium
+        modifier = modifier.clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.medium,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .padding(vertical = 14.dp, horizontal = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Icon(
                 imageVector = icon,
-                contentDescription = label,
-                tint = contentColor,
-                modifier = Modifier.size(28.dp)
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp)
             )
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelMedium,
-                color = contentColor,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1
             )
@@ -480,88 +558,75 @@ private fun QuickActionButton(
     }
 }
 
-// ── Section Header ──────────────────────────────────────────────────────────
+// ── Section header + recent invoice row + empty state ──────────────────────
 
 @Composable
 private fun SectionHeader(
     title: String,
-    icon: ImageVector,
-    iconTint: Color = MaterialTheme.colorScheme.primary,
-    actionText: String? = null,
+    actionLabel: String? = null,
     onActionClick: () -> Unit = {}
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 20.dp, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconTint,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        if (actionLabel != null) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-        }
-        if (actionText != null) {
-            Text(
-                text = actionText,
+                text = actionLabel,
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
                 modifier = Modifier
-                    .clip(MaterialTheme.shapes.small)
                     .clickable(onClick = onActionClick)
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                    .padding(horizontal = 6.dp, vertical = 4.dp)
             )
         }
     }
 }
 
-// ── Recent Invoice Item ─────────────────────────────────────────────────────
-
 @Composable
-private fun RecentInvoiceItem(
+private fun RecentInvoiceRow(
     invoice: Invoice,
     currencySymbol: String,
     onClick: () -> Unit
 ) {
-    val dateFormatter = remember {
-        SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault())
-    }
-
     val statusColor = when (invoice.status) {
         InvoiceStatus.COMPLETED -> ProfitGreen
         InvoiceStatus.CREDIT -> StockLow
         InvoiceStatus.CANCELLED -> StockCritical
     }
+    val dateLabel = remember(invoice.createdAt) {
+        if (isSameDayAsToday(invoice.createdAt))
+            SimpleDateFormat("hh:mm a", Locale.getDefault()).format(Date(invoice.createdAt))
+        else
+            SimpleDateFormat("d MMM, hh:mm a", Locale.getDefault()).format(Date(invoice.createdAt))
+    }
 
-    Card(
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
+            .padding(horizontal = 16.dp)
             .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        ),
-        shape = MaterialTheme.shapes.medium
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 14.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Invoice icon with status color accent
             Surface(
-                modifier = Modifier.size(42.dp),
+                modifier = Modifier.size(38.dp),
                 shape = CircleShape,
                 color = statusColor.copy(alpha = 0.12f)
             ) {
@@ -570,191 +635,76 @@ private fun RecentInvoiceItem(
                         imageVector = Icons.Filled.Receipt,
                         contentDescription = null,
                         tint = statusColor,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
+            Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = invoice.invoiceNumber,
                     style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (!invoice.customerName.isNullOrBlank()) {
                         Icon(
                             imageVector = Icons.Filled.Person,
                             contentDescription = null,
-                            modifier = Modifier.size(14.dp),
+                            modifier = Modifier.size(12.dp),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(Modifier.width(4.dp))
                         Text(
                             text = invoice.customerName,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "  •  ",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                     Text(
-                        text = dateFormatter.format(Date(invoice.createdAt)),
+                        text = dateLabel,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    text = formatMoney(invoice.totalAmount, currencySymbol),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Surface(
-                    shape = MaterialTheme.shapes.extraSmall,
-                    color = statusColor.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = invoice.status.name,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = statusColor,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                    )
-                }
-            }
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = formatMoney(invoice.totalAmount, currencySymbol),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
 
-// ── Low Stock Item ──────────────────────────────────────────────────────────
-
 @Composable
-private fun LowStockItem(
-    product: Product,
-    onClick: () -> Unit
-) {
-    val stockRatio = if (product.minStockThreshold > 0) {
-        product.currentStock / product.minStockThreshold
-    } else 1.0
-
-    val stockColor = when {
-        product.currentStock <= 0 -> MaterialTheme.colorScheme.error
-        stockRatio <= 0.5 -> StockCritical
-        else -> StockLow
-    }
-
-    val stockLabel = when {
-        product.currentStock <= 0 -> "OUT OF STOCK"
-        stockRatio <= 0.5 -> "CRITICAL"
-        else -> "LOW"
-    }
-
+private fun EmptyStateRow(message: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clickable(onClick = onClick),
+            .padding(horizontal = 16.dp),
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = MaterialTheme.shapes.medium
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Warning icon
-            Surface(
-                modifier = Modifier.size(42.dp),
-                shape = CircleShape,
-                color = stockColor.copy(alpha = 0.12f)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Filled.Warning,
-                        contentDescription = null,
-                        tint = stockColor,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = product.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = "Stock: ${product.currentStock.toInt()} / Min: ${product.minStockThreshold.toInt()} ${product.unit}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Surface(
-                shape = MaterialTheme.shapes.extraSmall,
-                color = stockColor.copy(alpha = 0.12f)
-            ) {
-                Text(
-                    text = stockLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = stockColor,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-        }
-    }
-}
-
-// ── Empty State ─────────────────────────────────────────────────────────────
-
-@Composable
-private fun EmptyStateCard(
-    message: String,
-    icon: ImageVector
-) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-        ),
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier = Modifier.fillMaxWidth().padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = message,
                 style = MaterialTheme.typography.bodyMedium,
@@ -762,4 +712,35 @@ private fun EmptyStateCard(
             )
         }
     }
+}
+
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+private fun greetingForNow(): String {
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    return when (hour) {
+        in 5..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        in 17..21 -> "Good evening"
+        else -> "Hello"
+    }
+}
+
+/**
+ * Format money using the user-chosen currency symbol from Settings, NOT
+ * NumberFormat.getCurrencyInstance(locale) — the latter would render "$"
+ * for many devices regardless of what's saved in DataStore.
+ */
+private fun formatMoney(amount: Double, currencySymbol: String): String {
+    val number = NumberFormat.getNumberInstance(Locale.getDefault()).apply {
+        maximumFractionDigits = 0
+    }.format(amount)
+    return "$currencySymbol $number"
+}
+
+private fun isSameDayAsToday(epoch: Long): Boolean {
+    val today = Calendar.getInstance()
+    val that = Calendar.getInstance().apply { timeInMillis = epoch }
+    return today.get(Calendar.YEAR) == that.get(Calendar.YEAR) &&
+            today.get(Calendar.DAY_OF_YEAR) == that.get(Calendar.DAY_OF_YEAR)
 }
