@@ -23,7 +23,4 @@
         the first frame so all the no-chrome rules above apply once
         Compose takes over.
     -->
-    <style name="Theme.Vyntra.Splash" parent="Theme.SplashScreen">
-        <item name="postSplashScreenTheme">@style/Theme.Vyntra</item>
-    </style>
 </resources>

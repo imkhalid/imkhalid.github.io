@@ -1,0 +1,73 @@
+# =============================================================================
+# Vyntra — Android / Gradle / Kotlin / Compose
+# =============================================================================
+
+# ---- Gradle ----
+.gradle/
+build/
+!gradle-wrapper.jar
+gradle-app.setting
+gradle.properties.local
+
+# ---- Android build outputs ----
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.jar.lock
+captures/
+release/
+.cxx/
+output.json
+output-metadata.json
+
+# ---- Kotlin / KSP / KAPT ----
+.kotlin/
+
+# ---- Generated source ----
+**/generated/
+**/build/
+
+# ---- Local machine config ----
+# Contains absolute SDK / NDK paths and per-machine signing config.
+local.properties
+*.keystore
+*.jks
+keystore.properties
+signing.properties
+google-services.json.local
+
+# ---- IDE: Android Studio / IntelliJ ----
+.idea/
+*.iml
+*.ipr
+*.iws
+.run/
+
+# ---- IDE: VS Code ----
+.vscode/
+
+# ---- OS ----
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---- Logs / temp / crash dumps ----
+*.log
+*.tmp
+hs_err_pid*
+replay_pid*
+
+# ---- Coverage / tooling ----
+coverage/
+.lint/
+lint-results*.html
+lint-results*.xml
+
+# ---- NDK ----
+obj/
+
+# ---- Claude Code workspace metadata ----
+.claude/
