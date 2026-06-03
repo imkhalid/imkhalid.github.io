@@ -1,6 +1,12 @@
 package com.khalid.vyntra.presentation.components
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -68,14 +74,28 @@ fun StatCard(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            // Cross-fade + slide between value updates. Makes the dashboard
+            // feel "live" when totals refresh (e.g. after a sale completes
+            // and the user pops back).
+            AnimatedContent(
+                targetState = value,
+                transitionSpec = {
+                    (slideInVertically(animationSpec = tween(300)) { it / 2 } +
+                        fadeIn(animationSpec = tween(300))) togetherWith
+                        (slideOutVertically(animationSpec = tween(200)) { -it / 2 } +
+                            fadeOut(animationSpec = tween(200)))
+                },
+                label = "StatValue"
+            ) { animatedValue ->
+                Text(
+                    text = animatedValue,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             if (subtitle != null) {
                 Spacer(modifier = Modifier.height(4.dp))
