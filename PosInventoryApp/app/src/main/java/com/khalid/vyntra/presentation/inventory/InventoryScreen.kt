@@ -59,6 +59,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.compose.material.icons.filled.Check
+import com.khalid.vyntra.domain.model.Category
 import com.khalid.vyntra.domain.model.Product
 import com.khalid.vyntra.presentation.components.ConfirmDialog
 import com.khalid.vyntra.presentation.components.EmptyStateView
@@ -78,6 +80,32 @@ fun InventoryScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var productToDelete by remember { mutableStateOf<Product?>(null) }
+
+    // Bottom-sheet visibility flags for the filter bar.
+    var showFilterSheet by remember { mutableStateOf(false) }
+    var showSortSheet by remember { mutableStateOf(false) }
+
+    if (showFilterSheet) {
+        CategoryFilterSheet(
+            categories = uiState.categories,
+            selectedCategoryId = uiState.selectedCategoryId,
+            onSelect = { id ->
+                viewModel.onCategoryFilterSelected(id)
+                showFilterSheet = false
+            },
+            onDismiss = { showFilterSheet = false }
+        )
+    }
+    if (showSortSheet) {
+        SortSheet(
+            current = uiState.sort,
+            onSelect = { sort ->
+                viewModel.onSortSelected(sort)
+                showSortSheet = false
+            },
+            onDismiss = { showSortSheet = false }
+        )
+    }
 
     LaunchedEffect(Unit) {
         viewModel.event.collect { event ->
@@ -200,31 +228,17 @@ fun InventoryScreen(
                 )
             )
 
-            // Category filter chips
-            if (uiState.categories.isNotEmpty()) {
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    item {
-                        FilterChip(
-                            selected = uiState.selectedCategoryId == null,
-                            onClick = { viewModel.onCategoryFilterSelected(null) },
-                            label = { Text("All") }
-                        )
-                    }
-                    items(uiState.categories) { category ->
-                        FilterChip(
-                            selected = uiState.selectedCategoryId == category.id,
-                            onClick = { viewModel.onCategoryFilterSelected(category.id) },
-                            label = { Text(category.name) }
-                        )
-                    }
-                }
-            }
+            // Compact filter bar (Filters + Sort) replaces the old category
+            // chip strip. Chips are tappable; each opens a ModalBottomSheet.
+            val activeFilterCount = if (uiState.selectedCategoryId != null) 1 else 0
+            com.khalid.vyntra.presentation.components.VyntraFilterBar(
+                activeFilterCount = activeFilterCount,
+                onFiltersClick = { showFilterSheet = true },
+                sortLabel = uiState.sort.label,
+                onSortClick = { showSortSheet = true }
+            )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Content
             when {
@@ -359,6 +373,123 @@ private fun ProductListItem(
                     text = "${product.currentStock.toInt()} ${product.unit}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+// ── Category filter sheet ───────────────────────────────────────────────────
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryFilterSheet(
+    categories: List<Category>,
+    selectedCategoryId: Long?,
+    onSelect: (Long?) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    androidx.compose.material3.ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+            Text(
+                text = "Filter by category",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+            )
+            SheetSelectRow(
+                label = "All categories",
+                selected = selectedCategoryId == null,
+                onClick = { onSelect(null) }
+            )
+            androidx.compose.material3.HorizontalDivider(
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            categories.forEach { category ->
+                SheetSelectRow(
+                    label = category.name,
+                    selected = category.id == selectedCategoryId,
+                    onClick = { onSelect(category.id) }
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+// ── Sort sheet ──────────────────────────────────────────────────────────────
+
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
+@Composable
+private fun SortSheet(
+    current: InventorySort,
+    onSelect: (InventorySort) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    androidx.compose.material3.ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)) {
+            Text(
+                text = "Sort by",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+            )
+            InventorySort.values().forEach { sort ->
+                SheetSelectRow(
+                    label = sort.label,
+                    selected = sort == current,
+                    onClick = { onSelect(sort) }
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+private fun SheetSelectRow(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    androidx.compose.material3.Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        color = androidx.compose.ui.graphics.Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (selected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurface,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
+            )
+            if (selected) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
