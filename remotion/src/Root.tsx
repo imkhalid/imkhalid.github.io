@@ -2,7 +2,7 @@ import { Composition } from "remotion";
 import { PromoVideo } from "./compositions/PromoVideo";
 
 const FPS = 30;
-const TOTAL_SECONDS = 45; // 3 intro + 25 showcase + 10 callout + 7 outro
+const TOTAL_SECONDS = 55; // 3 intro + 45 showcase + 7 outro
 
 export function RemotionRoot() {
   return (
