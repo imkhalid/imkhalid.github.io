@@ -5,3 +5,5 @@ out/
 *.mov
 *.webm
 .DS_Store
+*.mp3
+*.bin
