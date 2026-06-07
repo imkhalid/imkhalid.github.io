@@ -2,8 +2,8 @@ import {
   AbsoluteFill,
   Audio,
   Easing,
+  OffthreadVideo,
   Sequence,
-  Video,
   interpolate,
   spring,
   staticFile,
@@ -145,16 +145,16 @@ function ShowcaseScene() {
 
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      {/* ── Recording fills entire frame ── */}
-      <Video
+      {/* ── Recording fills entire canvas ── */}
+      {/* OffthreadVideo handles non-seekable & high-fps recordings correctly */}
+      <OffthreadVideo
         src={staticFile("cashlytics-recording.mp4")}
         style={{
           position: "absolute",
           top: 0, left: 0,
-          width: 1080,
-          height: 1920,
+          width: "100%",
+          height: "100%",
           objectFit: "cover",
-          display: "block",
         }}
         startFrom={0}
         volume={0}
@@ -248,7 +248,7 @@ function OutroScene() {
 export function PromoVideo() {
   const { fps } = useVideoConfig();
   const INTRO    = Math.round(3  * fps);
-  const SHOWCASE = Math.round(45 * fps);
+  const SHOWCASE = Math.round(60 * fps);  // show first 60 s of the 105 s recording
   const OUTRO    = Math.round(7  * fps);
 
   return (
