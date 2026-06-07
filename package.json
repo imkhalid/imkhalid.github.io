@@ -1,0 +1,27 @@
+{
+  "name": "imkhalid.github.io",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "remotion:preview": "remotion preview remotion/src/index.ts",
+    "remotion:render": "remotion render remotion/src/index.ts CashlyticsPromo cashlytics-promo.mp4",
+    "remotion:studio": "remotion studio remotion/src/index.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://local_proxy@127.0.0.1:38437/git/imkhalid/imkhalid.github.io"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@remotion/cli": "^4.0.473",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "remotion": "^4.0.473",
+    "typescript": "^6.0.3"
+  }
+}
