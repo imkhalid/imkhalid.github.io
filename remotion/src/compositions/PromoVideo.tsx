@@ -78,15 +78,13 @@ function IntroScene() {
 
 // ── SHOWCASE (45 s) — recording fills canvas ──────────────────────────────────
 
+// 4 badges timed to each segment of the 24s showcase (30fps):
+// seg1 home 0–210f, seg2 SMS 210–510f, seg3 ledger 510–750f, seg4 notebook 750–930f
 const BADGES = [
-  { icon: "📱", text: "Auto SMS Detection",   start: 10  },
-  { icon: "🏦", text: "All major banks",       start: 160 },
-  { icon: "🔒", text: "100% Offline",          start: 310 },
-  { icon: "📊", text: "Finance ledger",        start: 460 },
-  { icon: "📝", text: "Smart notes",           start: 610 },
-  { icon: "☁️", text: "Google Drive backup",  start: 760 },
-  { icon: "🛡️", text: "Privacy-first",        start: 910 },
-  { icon: "⚡", text: "Zero manual entry",     start: 1060 },
+  { icon: "🏠", text: "Net balance overview",  start: 10  },
+  { icon: "📱", text: "Auto SMS capture",       start: 220 },
+  { icon: "📊", text: "Spending ledger",        start: 520 },
+  { icon: "📝", text: "Smart notebook",         start: 755 },
 ];
 
 function Badge({ icon, text, start }: { icon: string; text: string; start: number }) {
@@ -96,9 +94,9 @@ function Badge({ icon, text, start }: { icon: string; text: string; start: numbe
   const SHOW = 120; // frames visible
   const FADE = 20;
 
-  const inP  = spring({ frame: frame - start, fps, config: { damping: 14, stiffness: 110 } });
-  const inOp = interpolate(inP, [0, 1], [0, 1]);
-  const inY  = interpolate(inP, [0, 1], [24, 0]);
+  const inP   = spring({ frame: frame - start, fps, config: { damping: 14, stiffness: 110 } });
+  const inOp  = interpolate(inP, [0, 1], [0, 1]);
+  const inY   = interpolate(inP, [0, 1], [24, 0]);
   const outOp = interpolate(frame, [start + SHOW - FADE, start + SHOW], [1, 0], {
     extrapolateLeft: "clamp", extrapolateRight: "clamp",
     easing: Easing.in(Easing.cubic),
@@ -248,8 +246,8 @@ function OutroScene() {
 export function PromoVideo() {
   const { fps } = useVideoConfig();
   const INTRO    = Math.round(3  * fps);
-  const SHOWCASE = Math.round(60 * fps);  // show first 60 s of the 105 s recording
-  const OUTRO    = Math.round(7  * fps);
+  const SHOWCASE = Math.round(24 * fps);  // 4 pre-cut segments totalling ~31s source
+  const OUTRO    = Math.round(3  * fps);
 
   return (
     <AbsoluteFill style={{ background: BG }}>
