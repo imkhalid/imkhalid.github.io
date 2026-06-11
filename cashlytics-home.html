@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cashlytics — Smart Personal Finance Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0C0A1A;
+      --bg2:      #14112A;
+      --bg3:      #1C1830;
+      --border:   rgba(255,255,255,0.08);
+      --teal:     #4DD9AC;
+      --teal-dim: rgba(77,217,172,0.12);
+      --purple:   #7F77DD;
+      --purple-dim: rgba(127,119,221,0.14);
+      --rose:     #FF5C7C;
+      --text:     #F0EEF8;
+      --text-muted: rgba(240,238,248,0.55);
+      --text-dim:   rgba(240,238,248,0.35);
+      --radius:   14px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    a { color: var(--teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Header ─────────────────────────────────────────────────────── */
+    header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-mark {
+      width: 42px; height: 42px;
+      background: var(--teal);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: #0C0A1A;
+      flex-shrink: 0;
+      letter-spacing: -1px;
+    }
+
+    .brand-name { font-size: 18px; font-weight: 700; color: var(--text); }
+    .brand-tag  { font-size: 13px; color: var(--text-muted); }
+
+    nav {
+      margin-left: auto;
+      display: flex;
+      gap: 24px;
+      font-size: 14px;
+    }
+    nav a { color: var(--text-muted); }
+    nav a:hover { color: var(--teal); text-decoration: none; }
+
+    /* ── Hero ───────────────────────────────────────────────────────── */
+    .hero {
+      max-width: 860px;
+      margin: 72px auto 56px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--teal-dim);
+      color: var(--teal);
+      border: 1px solid rgba(77,217,172,0.25);
+      border-radius: 99px;
+      padding: 4px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+    }
+
+    .hero h1 span { color: var(--teal); }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin: 0 auto 36px;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none !important;
+    }
+    .btn-primary  { background: var(--teal); color: #0C0A1A; }
+    .btn-outline  { border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-outline:hover { border-color: var(--teal); color: var(--teal); }
+
+    /* ── Feature grid ───────────────────────────────────────────────── */
+    .section {
+      max-width: 960px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+
+    .section h2 {
+      text-align: center;
+      font-size: clamp(22px, 3.5vw, 32px);
+      font-weight: 700;
+      margin-bottom: 48px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+    }
+
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 16px;
+    }
+
+    .icon-teal   { background: var(--teal-dim); }
+    .icon-purple { background: var(--purple-dim); }
+    .icon-rose   { background: rgba(255,92,124,0.12); }
+
+    .card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    /* ── Google Drive section ───────────────────────────────────────── */
+    .drive-banner {
+      max-width: 860px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+
+    .drive-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px 36px;
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .drive-logo {
+      flex-shrink: 0;
+      width: 56px; height: 56px;
+    }
+
+    .drive-body { flex: 1; min-width: 240px; }
+
+    .drive-body h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .drive-body p {
+      color: var(--text-muted);
+      font-size: 15px;
+      margin-bottom: 16px;
+    }
+
+    .drive-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .drive-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .check {
+      color: var(--teal);
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .scope-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .scope-pill {
+      background: var(--teal-dim);
+      border: 1px solid rgba(77,217,172,0.2);
+      color: var(--teal);
+      border-radius: 99px;
+      padding: 4px 12px;
+      font-size: 12px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* ── Privacy highlight ──────────────────────────────────────────── */
+    .privacy-strip {
+      max-width: 860px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+
+    .privacy-strip-inner {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--teal);
+      border-radius: var(--radius);
+      padding: 24px 28px;
+    }
+
+    .privacy-strip-inner h3 {
+      font-size: 16px; font-weight: 700; margin-bottom: 10px;
+    }
+
+    .privacy-strip-inner p {
+      font-size: 14px; color: var(--text-muted); line-height: 1.7;
+    }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
+      padding: 28px 24px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    footer a { color: var(--text-muted); margin: 0 10px; }
+    footer a:hover { color: var(--teal); }
+
+    .footer-links { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo-mark">C</div>
+    <div>
+      <div class="brand-name">Cashlytics</div>
+      <div class="brand-tag">Personal Finance Tracker</div>
+    </div>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#google-drive">Google Drive</a>
+      <a href="cashlytics-privacy-policy.html">Privacy</a>
+      <a href="cashlytics-terms.html">Terms</a>
+    </nav>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="badge">Available on Android</div>
+    <h1>Track every rupee,<br><span>no spreadsheet needed</span></h1>
+    <p>
+      Cashlytics automatically captures bank SMS, parses transactions with on-device NLP,
+      and keeps a clean ledger of who owes whom — all without uploading your data anywhere.
+    </p>
+    <div class="cta-row">
+      <a class="btn btn-primary"
+         href="https://play.google.com/store/apps/details?id=com.cashlytics_tracker">
+        ▶&nbsp; Get on Google Play
+      </a>
+      <a class="btn btn-outline" href="cashlytics-privacy-policy.html">
+        Privacy Policy
+      </a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="section-label">What it does</div>
+    <h2>Everything you need, nothing you don't</h2>
+    <div class="grid-3">
+
+      <div class="card">
+        <div class="card-icon icon-teal">💬</div>
+        <h3>SMS Auto-Capture</h3>
+        <p>
+          Whitelist your bank's sender ID and Cashlytics reads every debit/credit SMS,
+          parses the amount and direction on-device, and queues it for your approval.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-purple">🧠</div>
+        <h3>Natural Language Entry</h3>
+        <p>
+          Type "Paid Ahmed 500 for groceries" or "Received 2000 from Hamza" —
+          the NLP engine supports English and Roman Urdu with 161 test-verified patterns.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-teal">📊</div>
+        <h3>Personal Ledger</h3>
+        <p>
+          Track who owes you and who you owe with a running per-person balance.
+          Filter by date, export to PDF, and share instantly.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-rose">☁️</div>
+        <h3>Cloud Backup</h3>
+        <p>
+          Back up your full database to Google Drive with one tap.
+          Restore on any device — atomic, validated with SQLite magic-byte checks.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-purple">🔒</div>
+        <h3>Fully On-Device</h3>
+        <p>
+          All transaction data lives on your phone. No server, no account required.
+          SMS is parsed locally; nothing leaves your device without your action.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon icon-teal">📝</div>
+        <h3>Notebook</h3>
+        <p>
+          Quick freeform notes for informal debts — no amount, no category, just a reminder.
+          Paired with the ledger for a complete picture.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Google Drive usage -->
+  <section class="drive-banner" id="google-drive">
+    <div class="drive-card">
+
+      <!-- Google Drive SVG logo -->
+      <svg class="drive-logo" viewBox="0 0 87.3 78" xmlns="http://www.w3.org/2000/svg">
+        <path d="m6.6 66.85 3.85 6.65c.8 1.4 1.95 2.5 3.3 3.3l13.75-23.8h-27.5c0 1.55.4 3.1 1.2 4.5z" fill="#0066da"/>
+        <path d="m43.65 25-13.75-23.8c-1.35.8-2.5 1.9-3.3 3.3l-25.4 44a9.06 9.06 0 0 0 -1.2 4.5h27.5z" fill="#00ac47"/>
+        <path d="m73.55 76.8c1.35-.8 2.5-1.9 3.3-3.3l1.6-2.75 7.65-13.25c.8-1.4 1.2-2.95 1.2-4.5h-27.502l5.852 11.5z" fill="#ea4335"/>
+        <path d="m43.65 25 13.75-23.8c-1.35-.8-2.9-1.2-4.5-1.2h-18.5c-1.6 0-3.15.45-4.5 1.2z" fill="#00832d"/>
+        <path d="m59.8 53h-32.3l-13.75 23.8c1.35.8 2.9 1.2 4.5 1.2h50.8c1.6 0 3.15-.45 4.5-1.2z" fill="#2684fc"/>
+        <path d="m73.4 26.5-12.7-22c-.8-1.4-1.95-2.5-3.3-3.3l-13.75 23.8 16.15 27h27.45c0-1.55-.4-3.1-1.2-4.5z" fill="#ffba00"/>
+      </svg>
+
+      <div class="drive-body">
+        <h2>Google Drive — Backup &amp; Restore only</h2>
+        <p>
+          Cashlytics uses Google Drive exclusively to back up and restore your personal
+          finance database. We request the narrowest possible scope and never access
+          files outside of Cashlytics' own app folder.
+        </p>
+
+        <ul class="drive-list">
+          <li>
+            <span class="check">✓</span>
+            <span><strong>What we upload:</strong> a single SQLite database file containing your ledger entries, notebook notes, and SMS sender whitelist.</span>
+          </li>
+          <li>
+            <span class="check">✓</span>
+            <span><strong>Where it lives:</strong> your Google Drive App Data folder — private to you, invisible to other apps and Drive's file browser.</span>
+          </li>
+          <li>
+            <span class="check">✓</span>
+            <span><strong>What we never do:</strong> read, modify, or list any files outside the Cashlytics app folder. No contacts, photos, documents, or other Drive files are ever accessed.</span>
+          </li>
+          <li>
+            <span class="check">✓</span>
+            <span><strong>When it runs:</strong> only when you explicitly tap "Back up now" or "Restore". No background sync without your action.</span>
+          </li>
+          <li>
+            <span class="check">✓</span>
+            <span><strong>Your data stays yours:</strong> you can delete the backup from Google Drive settings at any time, independent of the app.</span>
+          </li>
+        </ul>
+
+        <div class="scope-pills">
+          <span class="scope-pill">drive.appdata</span>
+          <span class="scope-pill">No drive.file</span>
+          <span class="scope-pill">No drive.readonly</span>
+          <span class="scope-pill">On-device NLP only</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy note -->
+  <section class="privacy-strip">
+    <div class="privacy-strip-inner">
+      <h3>Your data never leaves your device — except when you choose to back it up</h3>
+      <p>
+        SMS messages are read and parsed entirely on-device. Transaction data is stored
+        in a local Room database and is never transmitted to our servers.
+        The only outbound data is the backup file you explicitly upload to your own
+        Google Drive account. We have no server-side storage, no analytics on your
+        financial data, and no way to access your transactions.
+        Read the full <a href="cashlytics-privacy-policy.html">Privacy Policy</a> for details.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-links">
+      <a href="cashlytics-privacy-policy.html">Privacy Policy</a>
+      <a href="cashlytics-terms.html">Terms of Service</a>
+      <a href="mailto:iamandroid.eng@gmail.com">Contact</a>
+    </div>
+    &copy; 2025 Cashlytics. All rights reserved.
+  </footer>
+
+</body>
+</html>
