@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Indigo gradient background — deep premium, picks up light from
+         the top-left like a brushed-metal banking app icon. -->
+    <path
+        android:pathData="M0,0 L108,0 L108,108 L0,108 Z">
+        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt"
+            name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108">
+                <item android:offset="0" android:color="#4B4ED8" />
+                <item android:offset="0.55" android:color="#3B3DBF" />
+                <item android:offset="1" android:color="#16156B" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Soft highlight in the top-left for depth -->
+    <path
+        android:pathData="M0,0 L108,0 L108,40 L0,80 Z"
+        android:fillAlpha="0.12">
+        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt"
+            name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="108"
+                android:endY="108">
+                <item android:offset="0" android:color="#FFFFFF" />
+                <item android:offset="1" android:color="#FFFFFF00" />
+            </gradient>
+        </aapt:attr>
+    </path>
+</vector>

@@ -1,0 +1,11 @@
+Version 1.0.0 — Initial Release
+
+• Complete POS terminal with barcode scanning
+• Inventory management with categories and stock tracking
+• Customer and vendor management with ledger
+• 9 built-in business reports (Sales, P&L, Inventory Valuation, and more)
+• Invoice generation with PDF export
+• CSV import/export for products
+• Low stock notifications
+• Dark and light theme support
+• Free tier with optional one-time Pro upgrade

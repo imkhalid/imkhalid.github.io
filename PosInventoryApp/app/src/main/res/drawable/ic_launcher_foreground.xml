@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!--
+        Adaptive icon foreground. Inner 66dp safe-zone holds:
+          • A stylised receipt (rounded rectangle with a serrated bottom edge
+            and three text lines), tinted off-white.
+          • A gold checkmark medallion on the bottom-right, signalling
+            "invoice complete" — communicates the app's purpose at a glance.
+
+        Drawn from individual vector paths, so it stays crisp at every density
+        and supports the Android 13+ monochrome layer (see ic_launcher_monochrome.xml).
+    -->
+
+    <!-- ── Receipt body ────────────────────────────────────────────────── -->
+    <!-- Top rounded edge -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 36,28
+                          h 36
+                          a 4,4 0 0 1 4,4
+                          v 38
+                          h -44
+                          v -38
+                          a 4,4 0 0 1 4,-4 z" />
+
+    <!-- Serrated bottom edge — five inverted triangles -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 32,70
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5
+                          l 4.4,5
+                          l 4.4,-5 z" />
+
+    <!-- ── Receipt content lines (faint indigo so they read on white) ── -->
+    <!-- Line 1 -->
+    <path
+        android:fillColor="#3B3DBF"
+        android:fillAlpha="0.18"
+        android:pathData="M 39,38 h 30 v 4 a 2,2 0 0 1 -2,2 h -26 a 2,2 0 0 1 -2,-2 z" />
+    <!-- Line 2 (shorter) -->
+    <path
+        android:fillColor="#3B3DBF"
+        android:fillAlpha="0.18"
+        android:pathData="M 39,48 h 20 v 4 a 2,2 0 0 1 -2,2 h -16 a 2,2 0 0 1 -2,-2 z" />
+    <!-- Line 3 (medium) -->
+    <path
+        android:fillColor="#3B3DBF"
+        android:fillAlpha="0.18"
+        android:pathData="M 39,58 h 25 v 4 a 2,2 0 0 1 -2,2 h -21 a 2,2 0 0 1 -2,-2 z" />
+
+    <!-- ── Gold checkmark medallion (bottom-right) ─────────────────────── -->
+    <!-- White ring -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M 70,68 m -16,0 a 16,16 0 1,0 32,0 a 16,16 0 1,0 -32,0 z" />
+    <!-- Gold fill -->
+    <path
+        android:pathData="M 70,68 m -13,0 a 13,13 0 1,0 26,0 a 13,13 0 1,0 -26,0 z">
+        <aapt:attr xmlns:aapt="http://schemas.android.com/aapt"
+            name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="57"
+                android:startY="55"
+                android:endX="83"
+                android:endY="81">
+                <item android:offset="0" android:color="#FFD876" />
+                <item android:offset="1" android:color="#C9931A" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- White checkmark -->
+    <path
+        android:pathData="M 63,68 L 68,73 L 77,63"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="3.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+</vector>

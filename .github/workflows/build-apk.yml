@@ -1,0 +1,140 @@
+name: Build Vyntra APK
+
+on:
+  push:
+    branches:
+      - main
+      - 'claude/**'
+    paths:
+      - 'PosInventoryApp/**'
+      - '.github/workflows/build-apk.yml'
+  pull_request:
+    paths:
+      - 'PosInventoryApp/**'
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Which APK variant to build'
+        type: choice
+        default: 'all'
+        options:
+          - all
+          - free-debug
+          - pro-debug
+          - free-release
+          - pro-release
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: PosInventoryApp
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0 platform-tools'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
+      - name: Build Free Debug APK
+        if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'free-debug' || github.event_name != 'workflow_dispatch' }}
+        run: ./gradlew assembleFreeDebug --info --stacktrace 2>&1 | tee build-free-debug.log
+
+      - name: Build Pro Debug APK
+        if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'pro-debug' || github.event_name != 'workflow_dispatch' }}
+        run: ./gradlew assembleProDebug --info --stacktrace 2>&1 | tee build-pro-debug.log
+
+      - name: Build Free Release APK (unsigned)
+        if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'free-release' }}
+        run: ./gradlew assembleFreeRelease --info --stacktrace 2>&1 | tee build-free-release.log
+
+      - name: Build Pro Release APK (unsigned)
+        if: ${{ github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'pro-release' }}
+        run: ./gradlew assembleProRelease --info --stacktrace 2>&1 | tee build-pro-release.log
+
+      - name: Extract compile errors on failure
+        if: failure()
+        run: |
+          echo "::group::First 200 lines of 'e: file://' compile errors"
+          grep -h "^e: \|^error: \|\[ksp\]\|Unresolved reference\|Cannot find\|Could not resolve" build-*.log 2>/dev/null | head -200 || echo "no error pattern matched"
+          echo "::endgroup::"
+          echo "::group::Last 150 lines of build log"
+          tail -150 build-*.log 2>/dev/null | head -300 || true
+          echo "::endgroup::"
+
+      - name: Upload full build logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: PosInventoryApp/build-*.log
+          if-no-files-found: ignore
+
+      - name: List generated APKs
+        if: always()
+        run: find app/build/outputs/apk -name "*.apk" -type f 2>/dev/null | xargs -I {} ls -lh {} || true
+
+      - name: Upload Free Debug APK
+        if: ${{ success() && (github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'free-debug' || github.event_name != 'workflow_dispatch') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: vyntra-free-debug
+          path: PosInventoryApp/app/build/outputs/apk/free/debug/*.apk
+          if-no-files-found: warn
+
+      - name: Upload Pro Debug APK
+        if: ${{ success() && (github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'pro-debug' || github.event_name != 'workflow_dispatch') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: vyntra-pro-debug
+          path: PosInventoryApp/app/build/outputs/apk/pro/debug/*.apk
+          if-no-files-found: warn
+
+      - name: Upload Free Release APK (unsigned)
+        if: ${{ success() && (github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'free-release') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: vyntra-free-release-unsigned
+          path: PosInventoryApp/app/build/outputs/apk/free/release/*.apk
+          if-no-files-found: warn
+
+      - name: Upload Pro Release APK (unsigned)
+        if: ${{ success() && (github.event.inputs.build_type == 'all' || github.event.inputs.build_type == 'pro-release') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: vyntra-pro-release-unsigned
+          path: PosInventoryApp/app/build/outputs/apk/pro/release/*.apk
+          if-no-files-found: warn
+
+      - name: Build summary
+        if: always()
+        run: |
+          echo "### Vyntra Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Download APKs from the **Artifacts** section at the top of this page." >> $GITHUB_STEP_SUMMARY

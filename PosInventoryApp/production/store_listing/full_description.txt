@@ -1,0 +1,110 @@
+Vyntra is a powerful, offline-first Point of Sale (POS) and Inventory Management system built for small to medium businesses. Whether you run a retail shop, grocery store, pharmacy, or wholesale business — Vyntra puts complete business control in your pocket.
+
+No internet required. No monthly fees. Your data stays on your device.
+
+━━━━━━━━━━━━━━━━━━━━
+POINT OF SALE (POS)
+━━━━━━━━━━━━━━━━━━━━
+• Fast checkout with product search and barcode scanning
+• Add items to cart, adjust quantities, apply discounts
+• Multiple payment methods: Cash, Card, Credit, Split
+• Auto-calculate tax (GST/VAT), change, and totals
+• Generate professional invoices instantly
+• Credit sale tracking with customer balance management
+
+━━━━━━━━━━━━━━━━━━━━
+INVENTORY MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━
+• Add unlimited products with name, SKU, barcode, pricing, and images
+• Organize products into custom categories
+• Real-time stock level tracking with low stock alerts
+• Barcode/QR code scanning using your phone camera
+• Bulk import/export products via CSV
+• Stock adjustment with reason tracking and full history log
+• Damaged and expired goods write-off
+
+━━━━━━━━━━━━━━━━━━━━
+BILLING & INVOICING
+━━━━━━━━━━━━━━━━━━━━
+• Auto-generated invoice numbers with custom prefix
+• Configurable tax percentage (GST/VAT)
+• Per-item and overall discount support
+• Invoice history with search, filter by date/customer/status
+• Cancel invoices with automatic stock reversal
+• Export invoices as PDF for printing or sharing
+• Credit sale tracking with outstanding balance on customer accounts
+
+━━━━━━━━━━━━━━━━━━━━
+CUSTOMER MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━
+• Maintain customer database with contact details
+• Track credit limits and outstanding balances
+• View complete customer transaction history and ledger
+• Record payments against outstanding balances
+• Search and filter customers instantly
+
+━━━━━━━━━━━━━━━━━━━━
+VENDOR / SUPPLIER MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━
+• Manage vendor profiles with bank details
+• Record purchases with automatic stock updates
+• Track payable balances per vendor
+• View vendor-wise purchase history and payment records
+
+━━━━━━━━━━━━━━━━━━━━
+PURCHASE MANAGEMENT
+━━━━━━━━━━━━━━━━━━━━
+• Record purchases from vendors
+• Auto-update stock levels on purchase save
+• Cost price tracking and history
+• Purchase history with date and vendor filters
+
+━━━━━━━━━━━━━━━━━━━━
+POWERFUL REPORTS
+━━━━━━━━━━━━━━━━━━━━
+• Sales Report — daily, weekly, monthly, custom range
+• Purchase Report — track all procurement
+• Profit & Loss Summary — know your margins
+• Inventory Valuation — total stock value at a glance
+• Customer Ledger — outstanding receivables
+• Vendor Payable Report — what you owe
+• Low Stock Report — products needing restocking
+• Top Selling Products — your best performers
+• Tax Report — total tax collected
+• Export any report as PDF or CSV
+
+━━━━━━━━━━━━━━━━━━━━
+SMART ALERTS
+━━━━━━━━━━━━━━━━━━━━
+• Set minimum stock threshold per product
+• Automatic daily low stock check
+• Push notifications for products needing restocking
+• Never run out of your best sellers again
+
+━━━━━━━━━━━━━━━━━━━━
+BUSINESS SETTINGS
+━━━━━━━━━━━━━━━━━━━━
+• Business profile (name, address, tax number)
+• Custom invoice prefix and numbering
+• Configurable default tax rate
+• Multiple currency support (Rs, $, €, £, ₹)
+• Dark and Light theme
+
+━━━━━━━━━━━━━━━━━━━━
+FREE & PRO
+━━━━━━━━━━━━━━━━━━━━
+Vyntra is free to use with generous limits:
+• Free: Up to 10 inventory changes and 5 report views per month
+• Pro: Unlimited everything + no ads — one-time purchase, no subscription!
+
+━━━━━━━━━━━━━━━━━━━━
+WHY VYNTRA?
+━━━━━━━━━━━━━━━━━━━━
+✓ Works completely offline — no internet needed
+✓ All data stored locally on your device — your data is yours
+✓ Fast and lightweight — runs smoothly on any Android device
+✓ Clean Material Design 3 interface
+✓ No monthly subscription — Pro is a one-time purchase
+✓ Perfect for retail shops, groceries, pharmacies, electronics stores, wholesale businesses, and more
+
+Download Vyntra today and take control of your business!
