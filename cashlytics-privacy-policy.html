@@ -268,7 +268,7 @@
       <span class="badge">SMS stays on-device</span>
       <span class="badge">Premium removes ads</span>
     </div>
-    <p class="effective">Effective date: May 26, 2026 &nbsp;·&nbsp; Last updated: May 26, 2026</p>
+    <p class="effective">Effective date: May 26, 2026 &nbsp;·&nbsp; Last updated: July 16, 2026</p>
   </div>
 
   <div class="toc">
@@ -279,6 +279,7 @@
       <li><a href="#data-not-collected">Data we do NOT collect</a></li>
       <li><a href="#permissions">App permissions explained</a></li>
       <li><a href="#sms">SMS permissions and data handling</a></li>
+      <li><a href="#notifications">Notification access and data handling</a></li>
       <li><a href="#google-drive">Google Drive backup</a></li>
       <li><a href="#data-storage">How your data is stored</a></li>
       <li><a href="#third-parties">Third-party services and advertising</a></li>
@@ -293,7 +294,7 @@
     <h2><span class="num">1</span> Overview</h2>
     <p>Cashlytics ("we", "our", "the app") is a personal finance ledger and smart notebook application developed for Android. We are committed to protecting your privacy.</p>
     <div class="highlight-box">
-      <strong>The short version:</strong> Cashlytics stores all your financial data, notes, and SMS-parsed transactions locally on your device. We do not operate servers that store your personal information. We do not sell data. The only optional cloud interaction is a backup you explicitly initiate to your own personal Google Drive account. To support free use, the app shows ads from Google AdMob — these are described in detail in Section 8.
+      <strong>The short version:</strong> Cashlytics stores all your financial data, notes, and SMS-parsed transactions locally on your device. We do not operate servers that store your personal information. We do not sell data. The only optional cloud interaction is a backup you explicitly initiate to your own personal Google Drive account. To support free use, the app shows ads from Google AdMob — these are described in detail in Section 9.
     </div>
   </section>
 
@@ -331,6 +332,11 @@
             <td>Parsed on-device; only the extracted fields you approve are saved to the Room database. Original SMS text is not retained.</td>
           </tr>
           <tr>
+            <td>Notification content from whitelisted bank apps</td>
+            <td class="purpose">Auto-detect and parse transaction alerts from banks that notify without SMS</td>
+            <td>Parsed on-device; only the extracted fields you approve are saved to the Room database. Notifications from other apps are ignored and never stored.</td>
+          </tr>
+          <tr>
             <td>Voice input (microphone audio)</td>
             <td class="purpose">Converted to text on-device; audio is never stored or transmitted</td>
             <td>Processed locally, discarded immediately</td>
@@ -342,7 +348,7 @@
           </tr>
           <tr>
             <td>Advertising ID (Android AAID)</td>
-            <td class="purpose">Used by Google AdMob to serve ads and prevent ad fraud — see Section 8</td>
+            <td class="purpose">Used by Google AdMob to serve ads and prevent ad fraud — see Section 9</td>
             <td>Read by the AdMob SDK; not stored by Cashlytics</td>
           </tr>
         </tbody>
@@ -357,6 +363,7 @@
       <li>Your name, email address, or any account information</li>
       <li>Location data of any kind</li>
       <li>The content of SMS messages from senders that are not on your whitelist</li>
+      <li>The content of notifications from any app you have not whitelisted for notification capture</li>
       <li>One-time passwords (OTPs) or promotional SMS (these are dropped by a filter before any parsing)</li>
       <li>Your contact list or phone book</li>
       <li>Browsing history or app usage data</li>
@@ -386,6 +393,11 @@
             <td><code>RECEIVE_SMS</code></td>
             <td>Required for real-time auto-capture: when a bank SMS arrives from a whitelisted sender, the app parses it on-device and queues the transaction for your approval.</td>
             <td>Yes — pairs with READ_SMS; opt-in</td>
+          </tr>
+          <tr>
+            <td><code>BIND_NOTIFICATION_LISTENER_SERVICE</code> (notification access)</td>
+            <td>Optional notification capture for banks that send transaction alerts only as app notifications, not SMS. Reads notifications only from bank apps you explicitly whitelist and parses them on-device. See Section 6 for the full handling details.</td>
+            <td>Yes — off by default; you grant access in system settings and choose the apps</td>
           </tr>
           <tr>
             <td><code>RECORD_AUDIO</code></td>
@@ -463,8 +475,46 @@
     </div>
   </section>
 
+  <section id="notifications">
+    <h2><span class="num">6</span> Notification access and data handling</h2>
+    <p>Some banks send transaction alerts only as app notifications, not as SMS. To capture those, Cashlytics offers an optional Notification Capture feature that uses Android's notification access (<code>BIND_NOTIFICATION_LISTENER_SERVICE</code>). Because notification access is a sensitive permission, this section explains exactly how it is used.</p>
+
+    <div class="highlight-box">
+      <strong>The short version:</strong> Notification Capture is off by default. When you turn it on, Cashlytics reads notifications only from the bank apps you choose, parses the transaction details on your device, and asks you to approve each entry before saving it. Nothing is uploaded to any server, ever.
+    </div>
+
+    <p><strong>Why we request notification access</strong></p>
+    <p>Notification access lets Cashlytics detect bank transaction alerts (e.g., "PKR 2,500 charged on your card at FOODPANDA") that your bank delivers only as a notification, and log them into your local expense ledger for your approval.</p>
+
+    <p><strong>What notification content we read</strong></p>
+    <ul class="policy-list">
+      <li>Only notifications from bank/wallet apps you have explicitly added to your whitelist in <em>Settings → Notification Capture</em>. Notifications from every other app — messengers, email, social, everything else — are ignored and never read or stored.</li>
+      <li>The feature is off by default. Before it does anything, the app shows an in-app disclosure explaining what will be read and how it will be used, and you must grant notification access in your device's system settings.</li>
+    </ul>
+
+    <p><strong>How it is processed</strong></p>
+    <ul class="policy-list">
+      <li>The transaction amount, merchant and direction (credit/debit) are extracted entirely <strong>on your device</strong> using the same offline parser used for SMS.</li>
+      <li>Your notification data <strong>never leaves your phone.</strong> We do not transmit it to any server, do not share it with any third party, and do not use it for advertising or analytics.</li>
+    </ul>
+
+    <p><strong>Where notification data is stored</strong></p>
+    <p>Only the extracted fields you approve are stored, in the same local Room database as your other entries. The original notification text is not retained, and notifications from non-whitelisted apps are never stored.</p>
+
+    <p><strong>Your controls</strong></p>
+    <ul class="policy-list">
+      <li>You can turn Notification Capture off at any time in <em>Settings → Notification Capture</em>.</li>
+      <li>You can remove any app from the whitelist at any time.</li>
+      <li>You can revoke the OS-level notification access at any time via Android Settings → Apps &amp; notifications → Special app access → Notification access.</li>
+    </ul>
+
+    <div class="warning-box">
+      Cashlytics reads notifications only from apps you whitelist, never hides or dismisses other apps' notifications, and makes no network calls in the notification code path. All processing is on-device.
+    </div>
+  </section>
+
   <section id="google-drive">
-    <h2><span class="num">6</span> Google Drive backup</h2>
+    <h2><span class="num">7</span> Google Drive backup</h2>
     <p>Cashlytics offers an optional feature to back up your data to Google Drive. Here is exactly how it works:</p>
     <ul class="policy-list">
       <li>The backup feature is entirely opt-in. It is off by default.</li>
@@ -480,7 +530,7 @@
   </section>
 
   <section id="data-storage">
-    <h2><span class="num">7</span> How your data is stored</h2>
+    <h2><span class="num">8</span> How your data is stored</h2>
     <p>All app data is stored in a local SQLite database managed by Android Room on your device. This database is stored in the app's private storage directory, which is:</p>
     <ul class="policy-list">
       <li>Not accessible to other apps (enforced by Android's security model)</li>
@@ -491,7 +541,7 @@
   </section>
 
   <section id="third-parties">
-    <h2><span class="num">8</span> Third-party services and advertising</h2>
+    <h2><span class="num">9</span> Third-party services and advertising</h2>
     <p>Cashlytics integrates with the following third-party Google services. None of them receive your transaction data, ledger entries, notebook content, or SMS data.</p>
 
     <p><strong>Google AdMob (advertising)</strong></p>
@@ -513,25 +563,26 @@
     <p>If you purchase the Premium upgrade, the transaction is processed by Google Play Billing. Cashlytics does not receive or store your payment method or full payment details. We only receive a purchase confirmation from Google.</p>
 
     <p><strong>Google Drive</strong></p>
-    <p>Only used if you explicitly enable backup. See Section 6.</p>
+    <p>Only used if you explicitly enable backup. See Section 7.</p>
 
     <p><strong>On-device only — not third parties</strong></p>
     <p>The natural language processing (NLP) that parses your transactions, notebook entries, and SMS messages runs entirely on-device. No text is sent to any external AI or cloud API.</p>
   </section>
 
   <section id="children">
-    <h2><span class="num">9</span> Children's privacy</h2>
+    <h2><span class="num">10</span> Children's privacy</h2>
     <p>Cashlytics is not directed at children under the age of 13. We do not knowingly collect personal information from children. Because the app stores all financial and SMS data locally and does not transmit that data to our servers, there is no mechanism by which we would receive such data from any user, regardless of age.</p>
     <p>If you believe a child has provided personal information through this app, please contact us and we will assist in addressing the concern.</p>
   </section>
 
   <section id="your-rights">
-    <h2><span class="num">10</span> Your rights</h2>
+    <h2><span class="num">11</span> Your rights</h2>
     <p>Because all sensitive data is stored on your own device, you have full control:</p>
     <ul class="policy-list">
       <li><strong>Access:</strong> All your data is visible directly within the app.</li>
       <li><strong>Delete:</strong> You can delete individual entries via swipe-to-delete, or delete all data by uninstalling the app.</li>
       <li><strong>Revoke SMS access:</strong> Disable individual senders in Settings, or revoke the OS-level SMS permission in Android Settings.</li>
+      <li><strong>Revoke notification access:</strong> Turn off Notification Capture or remove apps in Settings, or revoke the OS-level notification access in Android Settings.</li>
       <li><strong>Export:</strong> You can export your full data as a PDF or Excel file at any time.</li>
       <li><strong>Portability:</strong> Exported files are in standard formats (PDF, XLSX) you can use anywhere.</li>
       <li><strong>Revoke backup access:</strong> You can disconnect Google Drive at any time from within the app's Backup &amp; Restore screen.</li>
@@ -542,13 +593,13 @@
   </section>
 
   <section id="changes">
-    <h2><span class="num">11</span> Changes to this policy</h2>
+    <h2><span class="num">12</span> Changes to this policy</h2>
     <p>We may update this Privacy Policy from time to time. When we do, we will update the "Last updated" date at the top of this page and, where appropriate, notify you through the app.</p>
     <p>We encourage you to review this page periodically. Continued use of the app after any changes constitutes acceptance of the updated policy.</p>
   </section>
 
   <section id="contact">
-    <h2><span class="num">12</span> Contact us</h2>
+    <h2><span class="num">13</span> Contact us</h2>
     <p>If you have any questions about this Privacy Policy or how Cashlytics handles your data, please contact us:</p>
     <div class="highlight-box">
       <strong>Email:</strong> <a href="mailto:iamandroid.eng@gmail.com">iamandroid.eng@gmail.com</a><br>
@@ -561,7 +612,7 @@
 
 <footer>
   <p>&copy; 2026 Cashlytics. All rights reserved.</p>
-  <p>This privacy policy was last updated on May 26, 2026.</p>
+  <p>This privacy policy was last updated on July 16, 2026.</p>
   <p style="margin-top:8px"><a href="#overview">Back to top</a></p>
 </footer>
 
